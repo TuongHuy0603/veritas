@@ -1,155 +1,152 @@
 # Veritas
 
-A guardrail skill for AI-assisted coding. Three personas, six modules, one persistent state directory:
+> Umbrella builder and guardrail for AI-assisted software work.
 
-1. **Ground claims** — before the assistant states a fact about your code, verify it. *Persona: Skeptic.*
-2. **Gate actions** — before a destructive or shared-state action, check blast radius and reversibility. *Persona: Sentinel.*
-3. **Hand off and resume** — write a canonical scroll on pause; read it first on resume. *Persona: Archivist.*
-4. **Carry context across sessions** — a per-project `.veritas/` directory holds the ledger, audit log, handoff, lessons, and decisions so state survives compactions and tool switches.
+Five pillars. Eight slash commands. One shared state directory. Fabrication-proof by construction.
 
-Veritas does not plan features, generate designs, or run workflows. It sits above any planning or execution layer you already use and intervenes at four specific moments.
+| Pillar | What it does | Slash |
+|---|---|---|
+| **plan** | Brainstorm → PRD skeleton → architecture sketch → stories. Every assumption logged as a claim. | `/plan <goal>` |
+| **design** | Grounded design system (colors with contrast, typography, spacing, components, a11y). No generic templates. | `/design <brief>` |
+| **execute** | Atomic-commit loop with per-step risk gate and hash-chained action log. | `/execute <phase>` |
+| **verify** | TDD for features, bisect-driven debug for bugs, tests linked to claims in the DAG. | `/verify <target>` |
+| **guardrail** | Verifier, RiskGuard, SessionRecorder — interrupts other pillars on assertion, risky action, or session boundary. | `/gate`, `/ground`, `/handoff`, `/resume` |
+
+Priority across pillars: **Verifier → RiskGuard → SessionRecorder**. Guardrail triggers interrupt the active pillar.
 
 ---
 
 ## Install
 
-### Any supported platform
+### Any supported platform (multi-platform CLI)
 
 ```bash
 npx veritas-cli init --ai <platform>
 ```
 
-Supported platforms: `claude`, `cursor`, `windsurf`, `copilot`, `codex`, `gemini`, `continue`, `roocode`, `kilocode`, `opencode`, `trae`, `warp`, `kiro`.
-
-To see targets and notes:
+Platforms: `claude`, `cursor`, `windsurf`, `copilot`, `codex`, `gemini`, `continue`, `roocode`, `kilocode`, `opencode`, `trae`, `warp`, `kiro`.
 
 ```bash
-npx veritas-cli list
+npx veritas-cli list          # show target paths and notes
+npx veritas-cli uninstall --ai <platform>
 ```
 
 ### Manual (Claude Code)
 
 ```bash
 git clone https://github.com/TuongHuy0603/veritas.git
-mkdir -p ~/.claude/skills/veritas
+mkdir -p ~/.claude/skills/veritas ~/.claude/commands
 cp -r veritas/src/veritas/* ~/.claude/skills/veritas/
+cp veritas/commands/*.md ~/.claude/commands/
 ```
 
-### Initialize per-project state (optional but recommended)
+### Initialize per-project state
 
 ```bash
 cd your-project/
-python path/to/veritas/src/veritas/scripts/state.py init
+python path/to/veritas/src/veritas/scripts/track-state.py init
 ```
 
-This creates `.veritas/` with empty scaffolding. The assistant can create it lazily too, but running `init` up front makes the ledger visible immediately.
-
-### Uninstall
-
-```bash
-npx veritas-cli uninstall --ai <platform>
-```
-
----
-
-## Personas
-
-Each turn routes to at most one persona. A persona is a disposition — a stance, opening moves, and a set of refusals — not a separate agent.
-
-| Persona | Activates on | Default module | Writes to |
-|---|---|---|---|
-| **[Skeptic](src/veritas/personas/skeptic.md)** | Load-bearing claim about code | `ground-check` | `.veritas/LEDGER.md` |
-| **[Sentinel](src/veritas/personas/sentinel.md)** | Risky or irreversible action | `blast-radius` | `.veritas/audit.log` |
-| **[Archivist](src/veritas/personas/archivist.md)** | Session boundary, decision, correction | `handoff`, `postmortem`, `ledger` | `.veritas/HANDOFF.md`, `LESSONS.md`, `DECISIONS.md` |
-
-Priority when two triggers fire: **Sentinel → Skeptic → Archivist**. Routing logic lives in [`modules/persona.md`](src/veritas/modules/persona.md).
+Creates `.veritas/` scaffolding. Safe to commit everything except `.veritas/private/`.
 
 ---
 
 ## How activation works
 
-Veritas auto-activates when the assistant's next action matches a trigger. You do not invoke it with a slash command — it invokes itself.
+Two paths:
 
-| Trigger | Persona | Module |
+1. **Auto-activate.** The assistant reads `src/veritas/SKILL.md` and matches the current turn against `data/trigger-verbs.csv` (intent phrases) and `data/risky-ops.csv` (action gate). The matched pillar runs.
+2. **Explicit slash.** `/plan`, `/design`, `/execute`, `/verify`, `/gate`, `/ground`, `/handoff`, `/resume` each invoke their pillar unambiguously.
+
+Exactly one pillar per turn. Guardrail interrupts the others.
+
+---
+
+## The three guardrail roles
+
+| Role | Responsibility | Default module |
 |---|---|---|
-| Assistant is about to state a factual claim about code | Skeptic | `ground-check` |
-| Assistant is about to execute a risky or irreversible operation | Sentinel | `blast-radius` |
-| User pauses, resumes, or switches tools | Archivist | `handoff` |
-| Task completed, or a mistake was just corrected | Archivist | `postmortem` |
-| Decision made with a real reason | Archivist | `ledger` |
-
-Trigger verbs are in [`src/veritas/data/trigger-verbs.csv`](src/veritas/data/trigger-verbs.csv). Risky-op patterns are in [`src/veritas/data/risky-ops.csv`](src/veritas/data/risky-ops.csv).
+| **[Verifier](src/veritas/personas/verifier.md)** | Ground claims in real code before asserting | [`verify-claim`](src/veritas/modules/verify-claim.md) |
+| **[RiskGuard](src/veritas/personas/risk-guard.md)** | Gate destructive or shared-state actions (risk score + 4-question gate) | [`assess-risk`](src/veritas/modules/assess-risk.md) |
+| **[SessionRecorder](src/veritas/personas/session-recorder.md)** | Snapshot / resume session, record non-obvious lessons | [`save-session`](src/veritas/modules/save-session.md), [`record-lesson`](src/veritas/modules/record-lesson.md), [`track-state`](src/veritas/modules/track-state.md) |
 
 ---
 
-## The six modules
+## Persistent state: `.veritas/`
 
-### `ground-check` — anti-hallucination
-
-Before asserting "function X does Y" or "file Z contains W", verify. Uses file-read and code-search, not recall. Produces a `CLAIM / GROUNDED / EVIDENCE / GAPS` block. If a claim cannot be grounded, the output is "not verified", not a confident guess. See [`modules/ground-check.md`](src/veritas/modules/ground-check.md).
-
-### `blast-radius` — risk gate
-
-Before `rm -rf`, `DROP TABLE`, `git push --force`, `terraform destroy`, or any shared-state action, answer four questions: scope, reversibility, blast, authorization. Irreversible actions pause for confirmation even when authorized. See [`modules/blast-radius.md`](src/veritas/modules/blast-radius.md).
-
-### `handoff` — cross-session continuity
-
-One page, canonical format, written to `HANDOFF.md`. Goal, state, decisions with reasons, open questions, exact next step, and a **do-not** list (rediscovering dead ends is the most expensive part of resuming). Portable across tools. See [`modules/handoff.md`](src/veritas/modules/handoff.md).
-
-### `postmortem` — lesson capture
-
-The filter: *would a future session, with no memory of today, be worse off without this entry?* If no, write nothing. Record only what contradicts a default, encodes a hidden constraint, or cost real time. Every entry has an `EXPIRES` field. See [`modules/postmortem.md`](src/veritas/modules/postmortem.md).
-
-### `persona` — routing
-
-One turn, zero or one persona. Specifies the priority order when multiple triggers fire and the state effects each persona writes. See [`modules/persona.md`](src/veritas/modules/persona.md).
-
-### `ledger` — persistent state
-
-Reads and writes the `.veritas/` directory: assumption ledger with active/stale/retired promotion, append-only audit log for gate decisions, handoff scroll, lessons, decisions journal. Specifies the resume read-order. See [`modules/ledger.md`](src/veritas/modules/ledger.md).
-
----
-
-## Persistent state (`.veritas/`)
-
-Auto-created on first write. Plain text and JSON so any future reader — human or assistant — can use it without a live session.
+Shared by every pillar. Plain markdown + JSON so any future reader — human or assistant — can use it without a live session.
 
 ```
 .veritas/
-├── state.json       # active persona, turn counter, last decision, open questions
-├── LEDGER.md        # rolling assumption ledger: active / stale / retired
-├── audit.log        # append-only Sentinel gate decisions
-├── HANDOFF.md       # canonical session scroll (overwritten per snapshot)
-├── LESSONS.md       # postmortem entries with EXPIRES
-└── DECISIONS.md     # architectural decisions with "revisit when"
+├── state.json        # active role, turn counters, active pillar, phase, step
+├── claims.jsonl      # provenance DAG: claims with depends_on + evidence.fingerprint
+├── actions.jsonl     # hash-chained gate decisions (tamper-evident)
+├── history.jsonl     # approved-action history (feeds recency component of risk score)
+├── HANDOFF.md        # canonical session scroll (committed to git)
+├── LESSONS.md        # non-obvious lessons with EXPIRES
+├── DECISIONS.md      # architectural decisions with "Revisit when"
+└── private/          # gitignored — user-scoped secrets only
 ```
 
-**Promotion rules:** `unverified` ledger entries older than 24 hours become `stale`; `stale` older than 7 days becomes `retired`. `verified` stays active until a code change contradicts it, then moves straight to `retired`.
+### Two things that don't exist elsewhere
 
-**Schema** for `state.json`: [`src/veritas/state/schema.json`](src/veritas/state/schema.json).
+**Provenance DAG (`claims.jsonl`).** Every claim records `depends_on`, `evidence[].fingerprint` (sha1 of the cited file at verification time), and `touched_files`. When a cited file changes, `track-claims.py invalidate-changed` cascades `stale` to every dependent claim. This is how verified knowledge survives code drift.
+
+**Hash-chained action log (`actions.jsonl`).** Each entry has `prev_hash` and `hash` (SHA-256 of the entry minus the hash field). `log-actions.py verify` walks the chain and reports the first break. Tamper evidence, not convention.
 
 ---
 
-## Helper scripts
+## Risk scoring
 
-`src/veritas/scripts/verify.py` — zero-dependency grounding helpers:
+`score-risk.py "<action>" --rev <ref> --authz <yes|no|ambiguous>` returns a `[0.0, 1.0]` score with explainable components:
+
+| Component | Weight | Signal |
+|---|---|---|
+| `base_score` | 0.40 | Pattern hit in `data/risky-ops.csv` |
+| `reversibility` | 0.25 | `NONE` → 1.0, commit hash → 0.0 |
+| `branch` | 0.15 | Shared branch (`main`, `master`, `release/*`, `prod`, `staging`) → 1.0 |
+| `authorization` | 0.10 | `no` → 1.0, `ambiguous` → 0.7, `yes` → 0.0 |
+| `recency` | 0.10 | Familiar approved action < 1h ago → −0.5 |
+
+Thresholds: `< 0.30` proceed, `0.30–0.70` pause, `≥ 0.70` abort. No ML. Deterministic and auditable.
+
+---
+
+## Scripts
+
+Zero-dependency Python. Runnable directly.
 
 ```bash
-python verify.py path src/foo.py
-python verify.py symbol src/foo.py my_function
-python verify.py version package.json react
+python src/veritas/scripts/verify-claim.py path src/foo.py
+python src/veritas/scripts/verify-claim.py symbol src/foo.py my_function
+python src/veritas/scripts/verify-claim.py version package.json react
+
+python src/veritas/scripts/track-claims.py add --text "..." --file src/foo.py --line 42
+python src/veritas/scripts/track-claims.py verify c_ab12
+python src/veritas/scripts/track-claims.py invalidate-changed
+python src/veritas/scripts/track-claims.py list --status stale
+
+python src/veritas/scripts/log-actions.py append pause-for-confirmation "DROP TABLE sessions" --rev NONE --authz ambiguous
+python src/veritas/scripts/log-actions.py verify
+python src/veritas/scripts/log-actions.py tail 10
+
+python src/veritas/scripts/score-risk.py "terraform destroy" --authz no
+
+python src/veritas/scripts/track-state.py init
+python src/veritas/scripts/track-state.py migrate
+python src/veritas/scripts/track-state.py show
 ```
 
-`src/veritas/scripts/state.py` — zero-dependency state helpers:
+---
+
+## Tests
 
 ```bash
-python state.py init
-python state.py set-persona sentinel
-python state.py audit pause-for-confirmation "DROP TABLE sessions" --rev NONE --authz ambiguous
-python state.py show
+pip install pytest
+pytest tests/
 ```
 
-Exit `0` on success, `1` on not-verified or bad input.
+Subprocess tests for the DAG, the hash chain, and the risk scorer.
 
 ---
 
@@ -158,52 +155,37 @@ Exit `0` on success, `1` on not-verified or bad input.
 ```
 veritas/
 ├── .claude-plugin/plugin.json
+├── commands/                   # slash commands (/plan, /design, /execute, /verify, /gate, /ground, /handoff, /resume)
 ├── cli/
-│   ├── adapters.json
-│   ├── index.js
+│   ├── adapters.json           # per-platform install targets
+│   ├── index.js                # CLI installer
 │   └── package.json
 ├── src/veritas/
-│   ├── SKILL.md
-│   ├── personas/
-│   │   ├── skeptic.md
-│   │   ├── sentinel.md
-│   │   └── archivist.md
-│   ├── modules/
-│   │   ├── ground-check.md
-│   │   ├── blast-radius.md
-│   │   ├── handoff.md
-│   │   ├── postmortem.md
-│   │   ├── persona.md
-│   │   └── ledger.md
-│   ├── data/
-│   │   ├── risky-ops.csv
-│   │   └── trigger-verbs.csv
-│   ├── state/
-│   │   └── schema.json
-│   └── scripts/
-│       ├── verify.py
-│       └── state.py
-├── docs/
-│   └── ACTIVATION.md
-├── package.json
-├── skill.json
+│   ├── SKILL.md                # umbrella router
+│   ├── pillars/                # plan, design, execute, verify, guardrail
+│   ├── personas/               # verifier, risk-guard, session-recorder
+│   ├── modules/                # verify-claim, assess-risk, save-session, record-lesson, route-role, track-state
+│   ├── data/                   # trigger-verbs, risky-ops, pillar-intents, design-rules
+│   ├── state/schema.json       # JSON schema for state.json
+│   └── scripts/                # verify-claim, track-claims, log-actions, score-risk, track-state
+├── tests/
+├── docs/ACTIVATION.md
+├── CHANGELOG.md
 ├── README.md
 ├── LICENSE
-└── .gitignore
+├── package.json
+└── skill.json
 ```
 
 ---
 
 ## Design principles
 
-- **Small surface.** Six modules, three personas, one decision tree. If a task does not hit a trigger, the skill stays dormant.
-- **No fabrication.** If a claim cannot be grounded, the correct answer is "not verified".
-- **Reversibility is a real reference.** A rollback plan must point to a commit, backup, or compensating action — never a hypothesis.
-- **State is plaintext.** `.veritas/` is human-readable markdown and JSON; no database, no daemon, no network.
-- **Silence beats noise.** Most sessions produce zero postmortem entries. That is the target.
-- **Append-only where it matters.** `audit.log` records declined actions — history of things *not* done is itself evidence.
-
----
+- **Small surface, sharp edges.** Five pillars, three roles, six modules. If a turn does not match a trigger, nothing activates.
+- **No fabrication.** Unverifiable claims are marked unverified, not hedged with "probably".
+- **Evidence beats assertion.** Every claim carries a file fingerprint; every gate decision carries a hash.
+- **Silence beats noise.** Most sessions produce zero lessons. That is the target.
+- **Local plaintext.** `.veritas/` is markdown + JSON; no database, no daemon, no telemetry.
 
 ## License
 

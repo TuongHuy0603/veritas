@@ -1,22 +1,28 @@
 {
   "name": "veritas",
-  "displayName": "Veritas — Truth, Risk, Continuity, Learning",
-  "description": "A guardrail layer for AI-assisted coding. Three personas (Skeptic, Sentinel, Archivist), six modules, and a persistent .veritas/ state directory. Grounds claims in real code before asserting, gates risky actions by blast radius and reversibility, produces canonical handoffs, captures non-obvious lessons, and carries state across sessions.",
-  "version": "0.2.0",
+  "displayName": "Veritas — Umbrella Builder & Guardrail",
+  "description": "A five-pillar builder and guardrail for AI-assisted software work. Plan features, design UIs, execute phases, verify with TDD, and gate risky actions — with shared .veritas/ state (provenance DAG, hash-chained action log, canonical handoff, decision journal) across every pillar.",
+  "version": "1.0.0",
   "author": "TuongHuy0603",
   "license": "MIT",
   "repository": "https://github.com/TuongHuy0603/veritas",
+  "homepage": "https://github.com/TuongHuy0603/veritas",
   "keywords": [
     "ai-skill",
+    "builder",
     "guardrails",
-    "hallucination",
-    "verification",
-    "risk-management",
+    "planning",
+    "design-system",
+    "tdd",
+    "systematic-debugging",
+    "risk-scoring",
+    "hash-chained-audit",
+    "provenance-dag",
     "session-handoff",
-    "postmortem",
-    "grounding",
-    "persona",
-    "context-persistence"
+    "claude-code",
+    "cursor",
+    "windsurf",
+    "copilot"
   ],
   "platforms": [
     "claude",
@@ -35,18 +41,35 @@
   ],
   "install": "npx veritas-cli init --ai {{platform}}",
   "entrypoint": "src/veritas/SKILL.md",
-  "personas": [
-    "src/veritas/personas/skeptic.md",
-    "src/veritas/personas/sentinel.md",
-    "src/veritas/personas/archivist.md"
+  "pillars": [
+    "src/veritas/pillars/plan.md",
+    "src/veritas/pillars/design.md",
+    "src/veritas/pillars/execute.md",
+    "src/veritas/pillars/verify.md",
+    "src/veritas/pillars/guardrail.md"
+  ],
+  "roles": [
+    "src/veritas/personas/verifier.md",
+    "src/veritas/personas/risk-guard.md",
+    "src/veritas/personas/session-recorder.md"
   ],
   "modules": [
-    "src/veritas/modules/ground-check.md",
-    "src/veritas/modules/blast-radius.md",
-    "src/veritas/modules/handoff.md",
-    "src/veritas/modules/postmortem.md",
-    "src/veritas/modules/persona.md",
-    "src/veritas/modules/ledger.md"
+    "src/veritas/modules/verify-claim.md",
+    "src/veritas/modules/assess-risk.md",
+    "src/veritas/modules/save-session.md",
+    "src/veritas/modules/record-lesson.md",
+    "src/veritas/modules/route-role.md",
+    "src/veritas/modules/track-state.md"
+  ],
+  "commands": [
+    "commands/plan.md",
+    "commands/design.md",
+    "commands/execute.md",
+    "commands/verify.md",
+    "commands/gate.md",
+    "commands/ground.md",
+    "commands/handoff.md",
+    "commands/resume.md"
   ],
   "state_directory": ".veritas"
 }

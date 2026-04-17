@@ -1,0 +1,28 @@
+rule_id,category,rule,rationale
+a11y-contrast-body,accessibility,Body text must meet WCAG AA 4.5:1 contrast against its background,WCAG 2.1 SC 1.4.3
+a11y-contrast-ui,accessibility,UI component borders and large text must meet WCAG AA 3:1,WCAG 2.1 SC 1.4.11
+a11y-focus-visible,accessibility,Interactive elements must show a visible focus ring in all themes,Keyboard accessibility
+a11y-aria-label,accessibility,Icon-only buttons must have aria-label or visible text,Screen-reader support
+a11y-motion,accessibility,Honor prefers-reduced-motion for all non-essential animation,Vestibular disorders
+a11y-target-size,accessibility,Primary tap targets must be at least 24x24 CSS pixels (44x44 preferred on touch),WCAG 2.2 SC 2.5.8
+type-pair-max-2,typography,Use at most two type families in a system (one heading + one body),Cognitive load
+type-scale-ratio,typography,Pick a scale ratio (1.125 / 1.25 / 1.333) and apply it consistently,Visual rhythm
+type-line-length,typography,Body line length between 45 and 75 characters for readability,Readability research
+space-scale-4,spacing,Spacing scale must be a geometric or arithmetic sequence (e.g. 4 8 12 16 24 32 48 64),Consistency
+color-neutral-5,color,Ship a 5-stop neutral scale minimum for surfaces and borders,Hierarchy
+color-semantic-3,color,Ship semantic colors for success / warning / danger at minimum,Feedback conventions
+color-dark-mode,color,Every color token has a dark-mode counterpart or an explicit "light-only" note,Consistent theming
+radius-consistency,shape,Use at most three radius values (small / medium / pill),Cohesion
+motion-duration-band,motion,Transition durations between 120ms and 240ms for most UI,Perceived responsiveness
+motion-easing,motion,Default easing is ease-out for entrances ease-in for exits,Natural motion feel
+component-variants,components,Each component declares states: default hover active disabled focus,Predictable interactivity
+component-density,components,Offer at most two density modes (compact / comfortable),Avoid variant explosion
+layout-grid-12,layout,Use a 12-column grid for desktop; 4-column for mobile,Responsive reflow
+layout-breakpoints,layout,Four breakpoints maximum: sm md lg xl,Maintenance load
+form-label-always,forms,Every form field has a visible label (not placeholder-only),Accessibility + usability
+form-error-adjacent,forms,Error messages appear adjacent to the field and are aria-describedby linked,Screen-reader feedback
+icon-size-scale,icons,Icons ship at 16 / 20 / 24 / 32 CSS pixels — pick two sizes for the system,Grid alignment
+empty-state,ux-pattern,Every list / table / search has a designed empty state,Avoid dead ends
+loading-skeleton,ux-pattern,Use skeleton screens for content longer than 400ms to load,Perceived performance
+error-boundary,ux-pattern,Every async surface shows a retry-able error state,Resilience
+content-microcopy,content,Action buttons use verbs; destructive actions name the object (Delete project),Clarity

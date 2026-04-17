@@ -1,4 +1,4 @@
-# Module: postmortem
+# Module: record-lesson
 
 **Purpose** — Extract the one or two things from this session that are worth remembering. Most sessions produce zero entries. That is the correct rate.
 
@@ -40,9 +40,13 @@ EXPIRES: <condition under which this lesson stops being true, or "unknown">
 
 ## Where entries go
 
-- If the user has a memory system, append there.
-- If not, write to `docs/LESSONS.md` in the project, newest first.
+- If the user has a memory system (e.g. Claude auto-memory), append there.
+- If not, write to `.veritas/LESSONS.md` in the project, newest first.
 - Never write entries into source files as comments. Lessons are not code.
+
+## Deduplication
+
+Before appending, diff the new lesson against existing `LESSONS.md`. If the WHY is substantially identical to an existing entry, update the existing one's EVIDENCE list instead of adding a duplicate.
 
 ## Anti-patterns
 

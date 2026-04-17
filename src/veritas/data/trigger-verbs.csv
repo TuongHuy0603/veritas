@@ -1,40 +1,53 @@
-verb,persona,module,note
-verify,skeptic,ground-check,explicit request to confirm a claim
-check,skeptic,ground-check,explicit request to confirm a claim
-confirm,skeptic,ground-check,explicit request to confirm a claim
-does X exist,skeptic,ground-check,existence question about symbol or file
-is it true that,skeptic,ground-check,truth question about code behavior
-what does X do,skeptic,ground-check,behavior question — must read the body
-what version,skeptic,ground-check,version question — must read manifest
-I think,skeptic,ground-check,confident assertion without stated evidence
-should be,skeptic,ground-check,confident assertion without stated evidence
-probably,skeptic,ground-check,hedged claim that is about to be treated as fact
-is it safe to,sentinel,blast-radius,user is pausing before action
-can I just,sentinel,blast-radius,often precedes a destructive shortcut
-I'll just,sentinel,blast-radius,speed-up phrasing — red flag for Sentinel
-let me quickly,sentinel,blast-radius,speed-up phrasing — red flag for Sentinel
-delete,sentinel,blast-radius,destructive verb
-drop,sentinel,blast-radius,destructive verb — schema or table
-truncate,sentinel,blast-radius,destructive verb — data loss
-force push,sentinel,blast-radius,history rewrite on shared branch
-reset hard,sentinel,blast-radius,local history loss
-rm -rf,sentinel,blast-radius,filesystem deletion
-migrate,sentinel,blast-radius,schema change — check reversibility
-rollback,sentinel,blast-radius,user is reversing — verify rollback path is real
-undo,sentinel,blast-radius,user is reversing
-pause,archivist,handoff,session boundary — write scroll
-handoff,archivist,handoff,explicit handoff request
-switch tool,archivist,handoff,cross-AI transfer
-save state,archivist,handoff,session boundary
-continue previous,archivist,handoff,resume — read scroll first
-resume,archivist,handoff,resume — read scroll first
-pick up where,archivist,handoff,resume
-that was wrong,archivist,postmortem,correction — candidate lesson
-no not that,archivist,postmortem,correction — candidate lesson
-actually,archivist,postmortem,correction marker — check if surprising
-we got burned,archivist,postmortem,prior incident — high-value lesson
-save that,archivist,postmortem,explicit lesson request
-remember this,archivist,postmortem,explicit lesson request
-we decided,archivist,ledger,decision with reason — candidate for DECISIONS.md
-because,archivist,ledger,reason clause — may promote a decision entry
-revisit when,archivist,ledger,explicit expiry clause on a decision
+verb,pillar,role,module,note
+verify,guardrail,verifier,verify-claim,explicit grounding request
+check that,guardrail,verifier,verify-claim,explicit grounding request
+confirm,guardrail,verifier,verify-claim,explicit grounding request
+does X exist,guardrail,verifier,verify-claim,existence question
+is it true that,guardrail,verifier,verify-claim,truth question
+what does X do,guardrail,verifier,verify-claim,behavior question
+what version,guardrail,verifier,verify-claim,version question
+is it safe to,guardrail,risk-guard,assess-risk,pre-action pause
+can I just,guardrail,risk-guard,assess-risk,shortcut red flag
+I'll just,guardrail,risk-guard,assess-risk,speed-up red flag
+let me quickly,guardrail,risk-guard,assess-risk,speed-up red flag
+delete,guardrail,risk-guard,assess-risk,destructive verb
+drop table,guardrail,risk-guard,assess-risk,destructive — schema
+truncate,guardrail,risk-guard,assess-risk,destructive — data
+force push,guardrail,risk-guard,assess-risk,history rewrite
+reset hard,guardrail,risk-guard,assess-risk,local history loss
+rm -rf,guardrail,risk-guard,assess-risk,filesystem deletion
+migrate,guardrail,risk-guard,assess-risk,schema change
+rollback,guardrail,risk-guard,assess-risk,reversing — verify path real
+undo,guardrail,risk-guard,assess-risk,reversing
+pause,guardrail,session-recorder,save-session,session boundary
+handoff,guardrail,session-recorder,save-session,explicit handoff
+switch tool,guardrail,session-recorder,save-session,cross-AI transfer
+save state,guardrail,session-recorder,save-session,session boundary
+continue previous,guardrail,session-recorder,save-session,resume
+resume,guardrail,session-recorder,save-session,resume
+pick up where,guardrail,session-recorder,save-session,resume
+that was wrong,guardrail,session-recorder,record-lesson,correction
+no not that,guardrail,session-recorder,record-lesson,correction
+we got burned,guardrail,session-recorder,record-lesson,prior incident
+save that,guardrail,session-recorder,record-lesson,explicit lesson
+remember this,guardrail,session-recorder,record-lesson,explicit lesson
+we decided,guardrail,session-recorder,track-state,decision with reason
+revisit when,guardrail,session-recorder,track-state,decision expiry
+plan this feature,plan,,,full planning artifact set
+break this down,plan,,,task decomposition
+write a PRD,plan,,,PRD skeleton
+spec this out,plan,,,spec request
+design the UI,design,,,design system request
+design system for,design,,,design tokens
+landing page for,design,,,UI brief
+style guide,design,,,design system
+palette for,design,,,color + contrast
+implement phase,execute,,,phase execution
+build this,execute,,,execution from plan
+run the plan,execute,,,phase loop
+ship it,execute,,,final phase
+write a failing test,verify,,,TDD mode
+debug this,verify,,,systematic debug
+why is this failing,verify,,,systematic debug
+add coverage for,verify,,,TDD coverage
+reproduce this bug,verify,,,debug reproduction

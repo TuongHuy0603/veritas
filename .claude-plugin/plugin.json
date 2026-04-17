@@ -1,11 +1,21 @@
 {
   "name": "veritas",
-  "version": "0.2.0",
-  "description": "Guardrail layer with three personas (Skeptic, Sentinel, Archivist) and a persistent .veritas/ state directory.",
+  "version": "1.0.0",
+  "description": "Five-pillar builder and guardrail: plan, design, execute, verify, and gate — with a shared .veritas/ state directory.",
   "skills": [
     {
       "name": "veritas",
       "path": "../src/veritas/SKILL.md"
     }
+  ],
+  "commands": [
+    { "name": "plan", "path": "../commands/plan.md" },
+    { "name": "design", "path": "../commands/design.md" },
+    { "name": "execute", "path": "../commands/execute.md" },
+    { "name": "verify", "path": "../commands/verify.md" },
+    { "name": "gate", "path": "../commands/gate.md" },
+    { "name": "ground", "path": "../commands/ground.md" },
+    { "name": "handoff", "path": "../commands/handoff.md" },
+    { "name": "resume", "path": "../commands/resume.md" }
   ]
 }

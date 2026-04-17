@@ -24,4 +24,4 @@ build/
 *.tgz
 .npm/
 
-HANDOFF.md
+.veritas/private/

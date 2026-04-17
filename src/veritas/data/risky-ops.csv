@@ -1,31 +1,31 @@
-pattern,category,default_decision,reason
-rm -rf,filesystem,pause-for-confirmation,recursive force delete
-git push --force,vcs,pause-for-confirmation,rewrites remote history
-git push -f,vcs,pause-for-confirmation,rewrites remote history
-git reset --hard,vcs,pause-for-confirmation,discards local work
-git checkout --,vcs,pause-for-confirmation,discards uncommitted changes
-git clean -f,vcs,pause-for-confirmation,deletes untracked files
-git branch -D,vcs,pause-for-confirmation,force-deletes unmerged branch
-git rebase,vcs,pause-for-confirmation,history rewrite — dangerous on shared branches
-DROP TABLE,database,pause-for-confirmation,schema destruction
-DROP DATABASE,database,abort,full data loss
-TRUNCATE,database,pause-for-confirmation,data loss
-DELETE FROM,database,pause-for-confirmation,check for WHERE clause
-UPDATE without WHERE,database,abort,bulk data mutation
-ALTER TABLE,database,pause-for-confirmation,schema change — check migration plan
-npm uninstall,packages,pause-for-confirmation,dependency removal
-pip uninstall,packages,pause-for-confirmation,dependency removal
-cargo remove,packages,pause-for-confirmation,dependency removal
-docker rm,infra,pause-for-confirmation,container deletion
-docker volume rm,infra,pause-for-confirmation,persistent data loss
-kubectl delete,infra,pause-for-confirmation,cluster resource deletion
-terraform destroy,infra,abort,infrastructure teardown
-aws s3 rb,infra,abort,bucket removal
-gh pr merge,shared-surface,pause-for-confirmation,visible to collaborators
-gh pr close,shared-surface,pause-for-confirmation,visible to collaborators
-gh issue close,shared-surface,pause-for-confirmation,visible to collaborators
-slack send,shared-surface,pause-for-confirmation,message to humans
-email send,shared-surface,pause-for-confirmation,message to humans
-webhook post,shared-surface,pause-for-confirmation,external side effect
---no-verify,vcs,pause-for-confirmation,skips pre-commit hooks
---no-gpg-sign,vcs,pause-for-confirmation,bypasses signing policy
+pattern,category,default_decision,base_score,reason
+rm -rf,filesystem,pause-for-confirmation,0.80,recursive force delete
+git push --force,vcs,pause-for-confirmation,0.75,rewrites remote history
+git push -f,vcs,pause-for-confirmation,0.75,rewrites remote history
+git reset --hard,vcs,pause-for-confirmation,0.60,discards local work
+git checkout --,vcs,pause-for-confirmation,0.50,discards uncommitted changes
+git clean -f,vcs,pause-for-confirmation,0.55,deletes untracked files
+git branch -D,vcs,pause-for-confirmation,0.65,force-deletes unmerged branch
+git rebase,vcs,pause-for-confirmation,0.50,history rewrite on shared branches
+DROP TABLE,database,pause-for-confirmation,0.75,schema destruction
+DROP DATABASE,database,abort,0.95,full data loss
+TRUNCATE,database,pause-for-confirmation,0.70,data loss
+DELETE FROM,database,pause-for-confirmation,0.55,check for WHERE clause
+UPDATE without WHERE,database,abort,0.90,bulk data mutation
+ALTER TABLE,database,pause-for-confirmation,0.60,schema change
+npm uninstall,packages,pause-for-confirmation,0.40,dependency removal
+pip uninstall,packages,pause-for-confirmation,0.40,dependency removal
+cargo remove,packages,pause-for-confirmation,0.40,dependency removal
+docker rm,infra,pause-for-confirmation,0.55,container deletion
+docker volume rm,infra,pause-for-confirmation,0.75,persistent data loss
+kubectl delete,infra,pause-for-confirmation,0.70,cluster resource deletion
+terraform destroy,infra,abort,0.95,infrastructure teardown
+aws s3 rb,infra,abort,0.85,bucket removal
+gh pr merge,shared-surface,pause-for-confirmation,0.50,visible to collaborators
+gh pr close,shared-surface,pause-for-confirmation,0.45,visible to collaborators
+gh issue close,shared-surface,pause-for-confirmation,0.40,visible to collaborators
+slack send,shared-surface,pause-for-confirmation,0.45,message to humans
+email send,shared-surface,pause-for-confirmation,0.50,message to humans
+webhook post,shared-surface,pause-for-confirmation,0.50,external side effect
+--no-verify,vcs,pause-for-confirmation,0.55,skips pre-commit hooks
+--no-gpg-sign,vcs,pause-for-confirmation,0.55,bypasses signing policy

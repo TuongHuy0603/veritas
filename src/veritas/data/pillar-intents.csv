@@ -1,0 +1,31 @@
+intent_phrase,pillar,command,note
+plan this feature,plan,/plan,full plan with brainstorm + PRD + architecture + stories
+break this down,plan,/plan,task decomposition
+write a PRD,plan,/plan,PRD skeleton only
+spec this out,plan,/plan,PRD + stories
+design the UI,design,/design,grounded design system
+design system for,design,/design,design tokens and components
+landing page for,design,/design,UI brief
+style guide,design,/design,typography + color + spacing
+palette for,design,/design,color + contrast check
+implement phase,execute,/execute,atomic-commit execution
+build this,execute,/execute,execute existing plan
+run the plan,execute,/execute,phase-by-phase execution
+ship it,execute,/execute,final phase
+write a failing test,verify,/verify,TDD mode
+debug this,verify,/verify,systematic debug mode
+why is this failing,verify,/verify,systematic debug mode
+add coverage for,verify,/verify,TDD mode
+reproduce this bug,verify,/verify,debug reproduction step
+verify,guardrail,/ground,verify-claim module
+is it true that,guardrail,/ground,verify-claim module
+is it safe to,guardrail,/gate,assess-risk module
+can I delete,guardrail,/gate,assess-risk module
+can I drop,guardrail,/gate,assess-risk module
+force push,guardrail,/gate,assess-risk module
+pause,guardrail,/handoff,save-session module
+save state,guardrail,/handoff,save-session module
+continue previous,guardrail,/resume,save-session resume
+pick up where,guardrail,/resume,save-session resume
+remember this,guardrail,none,record-lesson auto
+that was wrong,guardrail,none,record-lesson auto

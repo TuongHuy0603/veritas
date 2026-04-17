@@ -2,24 +2,47 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/TuongHuy0603/veritas/state/schema.json",
   "title": "Veritas state.json",
-  "description": "Per-project persistent state for the Veritas skill.",
+  "description": "Per-project persistent state for the Veritas skill (v1.0+).",
   "type": "object",
-  "required": ["version", "active_persona", "turn", "updated_at"],
-  "additionalProperties": false,
+  "required": ["version", "active_role", "turn", "updated_at"],
+  "additionalProperties": true,
   "properties": {
     "version": {
       "type": "string",
       "description": "Veritas version that wrote this file.",
       "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
     },
-    "active_persona": {
+    "active_role": {
       "type": ["string", "null"],
-      "enum": ["skeptic", "sentinel", "archivist", null]
+      "enum": ["verifier", "risk-guard", "session-recorder", null]
     },
     "turn": {
       "type": "integer",
       "minimum": 0,
       "description": "Monotonically increasing turn counter for this project."
+    },
+    "role_turns": {
+      "type": "object",
+      "description": "Per-role turn counters for fatigue detection.",
+      "properties": {
+        "verifier": { "type": "integer", "minimum": 0 },
+        "risk-guard": { "type": "integer", "minimum": 0 },
+        "session-recorder": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": { "type": "integer", "minimum": 0 }
+    },
+    "active_pillar": {
+      "type": ["string", "null"],
+      "enum": ["plan", "design", "execute", "verify", "guardrail", null]
+    },
+    "phase": {
+      "type": ["string", "null"],
+      "description": "Current phase name for the execute pillar."
+    },
+    "step": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "Current step number within the active phase."
     },
     "last_gate_decision": {
       "type": ["string", "null"],

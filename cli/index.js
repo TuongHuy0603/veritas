@@ -17,7 +17,9 @@ const os = require("os");
 const path = require("path");
 
 const ADAPTERS = require("./adapters.json");
-const SKILL_ROOT = path.resolve(__dirname, "..", "src", "veritas");
+const REPO_ROOT = path.resolve(__dirname, "..");
+const SKILL_ROOT = path.join(REPO_ROOT, "src", "veritas");
+const COMMANDS_ROOT = path.join(REPO_ROOT, "commands");
 
 function expand(target) {
   if (target.startsWith("~")) {
@@ -39,18 +41,57 @@ function copyTree(from, to) {
   }
 }
 
-function renameEntrypoint(dir, layout) {
-  if (layout !== "rules-folder") return;
-  const from = path.join(dir, "SKILL.md");
-  const to = path.join(dir, "veritas.mdc");
-  if (fs.existsSync(from) && !fs.existsSync(to)) {
-    fs.renameSync(from, to);
-  }
+function copyFile(from, to) {
+  fs.mkdirSync(path.dirname(to), { recursive: true });
+  fs.copyFileSync(from, to);
 }
 
 function removeTree(dir) {
   if (!fs.existsSync(dir)) return;
   fs.rmSync(dir, { recursive: true, force: true });
+}
+
+function installSkill(skillDir, layout) {
+  copyTree(SKILL_ROOT, skillDir);
+  if (layout === "cursor-mdc") {
+    // Cursor expects flat .mdc files in .cursor/rules/, not a nested folder.
+    const entry = path.join(skillDir, "SKILL.md");
+    if (fs.existsSync(entry)) {
+      fs.renameSync(entry, path.join(path.dirname(skillDir), "veritas.mdc"));
+    }
+    // Move modules/personas into flat rule files too.
+    const subDirs = ["modules", "personas", "pillars"];
+    for (const sd of subDirs) {
+      const src = path.join(skillDir, sd);
+      if (!fs.existsSync(src)) continue;
+      for (const file of fs.readdirSync(src)) {
+        if (!file.endsWith(".md")) continue;
+        const flatName = `veritas-${sd}-${file.replace(/\.md$/, ".mdc")}`;
+        fs.renameSync(path.join(src, file), path.join(path.dirname(skillDir), flatName));
+      }
+    }
+    removeTree(skillDir);
+  } else if (layout === "rules-folder") {
+    const entry = path.join(skillDir, "SKILL.md");
+    const target = path.join(skillDir, "veritas.mdc");
+    if (fs.existsSync(entry) && !fs.existsSync(target)) {
+      fs.renameSync(entry, target);
+    }
+  }
+}
+
+function installCommands(commandsDir, layout) {
+  if (!fs.existsSync(COMMANDS_ROOT)) return;
+  fs.mkdirSync(commandsDir, { recursive: true });
+  for (const file of fs.readdirSync(COMMANDS_ROOT)) {
+    if (!file.endsWith(".md")) continue;
+    const src = path.join(COMMANDS_ROOT, file);
+    let name = file;
+    if (layout === "prompt-files") {
+      name = file.replace(/\.md$/, ".prompt.md");
+    }
+    copyFile(src, path.join(commandsDir, name));
+  }
 }
 
 function parseArgs(argv) {
@@ -74,10 +115,13 @@ function parseArgs(argv) {
 }
 
 function cmdList() {
-  console.log("Supported platforms:");
+  console.log("Supported platforms:\n");
   for (const [key, cfg] of Object.entries(ADAPTERS)) {
-    console.log(`  ${key.padEnd(12)} ${cfg.label.padEnd(22)} -> ${cfg.target}`);
-    if (cfg.notes) console.log(`               ${cfg.notes}`);
+    console.log(`  ${key.padEnd(12)} ${cfg.label}`);
+    console.log(`      skill    -> ${cfg.skill_target}`);
+    console.log(`      commands -> ${cfg.commands_target}`);
+    if (cfg.notes) console.log(`      note: ${cfg.notes}`);
+    console.log("");
   }
 }
 
@@ -87,13 +131,16 @@ function cmdInit(platform) {
     console.error(`Unknown platform: ${platform}. Run 'veritas-cli list' to see options.`);
     process.exit(2);
   }
-  const target = expand(cfg.target);
+  const skillTarget = expand(cfg.skill_target);
+  const commandsTarget = expand(cfg.commands_target);
   console.log(`Installing Veritas for ${cfg.label}`);
-  console.log(`  source: ${SKILL_ROOT}`);
-  console.log(`  target: ${target}`);
-  copyTree(SKILL_ROOT, target);
-  renameEntrypoint(target, cfg.layout);
-  console.log("Done. Veritas will auto-activate based on the triggers in SKILL.md.");
+  console.log(`  skill    source: ${SKILL_ROOT}`);
+  console.log(`           target: ${skillTarget}`);
+  console.log(`  commands source: ${COMMANDS_ROOT}`);
+  console.log(`           target: ${commandsTarget}`);
+  installSkill(skillTarget, cfg.layout);
+  installCommands(commandsTarget, cfg.layout);
+  console.log("\nDone. Veritas auto-activates based on SKILL.md triggers; slash commands are explicit.");
   if (cfg.notes) console.log(`Note: ${cfg.notes}`);
 }
 
@@ -103,13 +150,30 @@ function cmdUninstall(platform) {
     console.error(`Unknown platform: ${platform}.`);
     process.exit(2);
   }
-  const target = expand(cfg.target);
-  if (!fs.existsSync(target)) {
-    console.log(`Nothing to remove at ${target}.`);
-    return;
+  const skillTarget = expand(cfg.skill_target);
+  const commandsTarget = expand(cfg.commands_target);
+  let removed = false;
+  if (fs.existsSync(skillTarget)) {
+    removeTree(skillTarget);
+    console.log(`Removed ${skillTarget}`);
+    removed = true;
   }
-  removeTree(target);
-  console.log(`Removed ${target}.`);
+  // Only remove individual command files, never the platform's entire commands dir.
+  if (fs.existsSync(commandsTarget) && fs.existsSync(COMMANDS_ROOT)) {
+    for (const file of fs.readdirSync(COMMANDS_ROOT)) {
+      if (!file.endsWith(".md")) continue;
+      const base = file.replace(/\.md$/, "");
+      for (const candidate of [file, `${base}.prompt.md`, `${base}.mdc`]) {
+        const p = path.join(commandsTarget, candidate);
+        if (fs.existsSync(p)) {
+          fs.unlinkSync(p);
+          console.log(`Removed ${p}`);
+          removed = true;
+        }
+      }
+    }
+  }
+  if (!removed) console.log("Nothing to remove.");
 }
 
 function main() {
@@ -123,8 +187,8 @@ function main() {
         "veritas-cli — install the Veritas skill.",
         "",
         "Commands:",
-        "  init --ai <platform>       install into the given platform",
-        "  uninstall --ai <platform>  remove from the given platform",
+        "  init --ai <platform>       install skill + slash commands",
+        "  uninstall --ai <platform>  remove skill + slash commands",
         "  list                       show supported platforms",
       ].join("\n")
     );

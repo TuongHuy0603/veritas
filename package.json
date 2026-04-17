@@ -1,7 +1,7 @@
 {
   "name": "veritas-skill",
-  "version": "0.2.0",
-  "description": "A guardrail skill for AI-assisted coding. Three personas, six modules, persistent .veritas/ state. Grounds claims, gates risky actions, writes handoffs, captures lessons, and carries context across sessions.",
+  "version": "1.0.0",
+  "description": "A five-pillar builder and guardrail for AI-assisted coding. Plan, design, execute, verify — with a shared provenance DAG, hash-chained action log, and canonical session handoff.",
   "bin": {
     "veritas-cli": "./cli/index.js"
   },
@@ -10,8 +10,10 @@
   "files": [
     "src/",
     "cli/",
+    "commands/",
     "skill.json",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "engines": {
@@ -29,12 +31,13 @@
   "author": "TuongHuy0603",
   "keywords": [
     "ai-skill",
+    "builder",
     "guardrails",
-    "hallucination",
-    "verification",
-    "risk-management",
+    "planning",
+    "design-system",
+    "tdd",
+    "risk-scoring",
     "session-handoff",
-    "postmortem",
     "claude",
     "cursor",
     "windsurf",

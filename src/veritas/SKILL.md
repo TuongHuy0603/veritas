@@ -1,91 +1,73 @@
 ---
 name: veritas
-description: Activates before the assistant asserts factual claims about code, executes risky or destructive operations, ends or resumes a work session, or when the user reports that prior information was incorrect. Routes the turn to one of three personas — Skeptic (verify before asserting), Sentinel (gate before acting), Archivist (record and resume across sessions) — and writes durable state to a per-project .veritas/ directory so context survives compactions, pauses, and tool switches. Triggers on verbs like verify, check, confirm, is it safe to, rollback, undo, handoff, resume, continue previous session, and before any delete, drop, migrate, force-push, rm -rf, truncate, or schema change.
-version: 0.2.0
+description: A five-pillar builder and guardrail for AI-assisted software work. Auto-activates when the user or the assistant is about to plan a feature, design a UI, execute a phase, write or debug tests, assert facts about code, run destructive operations, pause, or resume. Routes each turn to exactly one pillar — plan, design, execute, verify, or guardrail — with a shared persistent state directory (.veritas/) containing a provenance DAG of claims, a hash-chained action log, a canonical session scroll, and a decision journal. Explicit slash commands are also available: /plan, /design, /execute, /verify, /gate, /ground, /handoff, /resume. Triggers on verbs like plan, PRD, break this down, design, palette, build, ship, TDD, debug, verify, check, is it safe to, delete, drop, force push, rm -rf, migrate, rollback, handoff, and resume.
+version: 1.0.0
 license: MIT
 ---
 
-# Veritas — Truth, Risk, Continuity, Learning
+# Veritas — an umbrella builder and guardrail
 
-Veritas is a guardrail layer. It does not plan features, it does not generate designs, it does not run workflows. It intervenes at four moments and carries state between them.
+Veritas routes the current turn to one of five pillars, shares state across all of them, and refuses to fabricate. It replaces five disconnected concerns — planning, design, execution, verification, safety — with one surface that carries provenance between them.
 
-1. **Before an assertion** — ground claims in real code, not memory or pattern-matching.
-2. **Before an action** — assess blast radius and confirm a rollback path exists.
-3. **On session boundary** — write or read a canonical handoff so context survives resets.
-4. **On session close** — extract lessons that are non-obvious and worth remembering.
+## The five pillars
 
-Four core modules. Three personas. One persistent state directory. If a task does not hit a trigger, this skill stays dormant.
-
----
-
-## Personas
-
-Each turn routes to at most one persona. The persona is a disposition — a stance, a set of opening moves, and a set of refusals — not a separate agent.
-
-| Persona | Activates on | Default module | Writes to |
+| Pillar | Activates when | Slash | Produces |
 |---|---|---|---|
-| **[Skeptic](personas/skeptic.md)** | Load-bearing claim about code | `ground-check` | `.veritas/LEDGER.md` |
-| **[Sentinel](personas/sentinel.md)** | Risky or irreversible action | `blast-radius` | `.veritas/audit.log` |
-| **[Archivist](personas/archivist.md)** | Session boundary, decision, correction | `handoff`, `postmortem`, `ledger` | `.veritas/HANDOFF.md`, `LESSONS.md`, `DECISIONS.md` |
+| [**plan**](pillars/plan.md) | Feature goal with no written plan | `/plan` | Brainstorm + PRD + architecture + stories; assumptions logged as unverified claims |
+| [**design**](pillars/design.md) | UI/UX brief, design system, or frontend phase starting | `/design` | Grounded design system (colors with contrast, type, spacing, components, a11y notes) |
+| [**execute**](pillars/execute.md) | Plan ready, next action is code | `/execute` | Atomic commits, per-step risk gate, hash-chained action log |
+| [**verify**](pillars/verify.md) | New feature needs coverage, or a bug needs diagnosis | `/verify` | Failing test → minimal fix → passing test, linked to a claim id |
+| [**guardrail**](pillars/guardrail.md) | Interrupts other pillars when asserting / acting / saving | `/gate`, `/ground`, `/handoff`, `/resume` | The existing six modules and three roles |
 
-Routing logic and priority rules live in [`modules/persona.md`](modules/persona.md).
+Exactly one pillar per turn. Guardrail triggers **interrupt** the other pillars (gate cannot be bypassed even to record a lesson).
 
----
+## The three guardrail roles
 
-## Modules
+| Role | Responsibility | Default module |
+|---|---|---|
+| [**Verifier**](personas/verifier.md) | Ground claims in real code before asserting | [`verify-claim`](modules/verify-claim.md) |
+| [**RiskGuard**](personas/risk-guard.md) | Gate destructive or shared-state actions | [`assess-risk`](modules/assess-risk.md) |
+| [**SessionRecorder**](personas/session-recorder.md) | Snapshot / resume session; record non-obvious lessons | [`save-session`](modules/save-session.md), [`record-lesson`](modules/record-lesson.md), [`track-state`](modules/track-state.md) |
 
-| Module | Responsibility |
-|---|---|
-| [`ground-check`](modules/ground-check.md) | Verify claims against real code before asserting them. |
-| [`blast-radius`](modules/blast-radius.md) | Gate destructive or shared-state actions by scope, reversibility, blast, authorization. |
-| [`handoff`](modules/handoff.md) | Write a one-page canonical scroll on pause; read it first on resume. |
-| [`postmortem`](modules/postmortem.md) | Capture only non-obvious lessons with an explicit expiry condition. |
-| [`persona`](modules/persona.md) | Route a turn to zero or one persona. |
-| [`ledger`](modules/ledger.md) | Persist state to `.veritas/` so context survives turns and sessions. |
-
----
+Priority when multiple triggers fire in one turn: **Verifier → RiskGuard → SessionRecorder**. Verifier runs first because gating an unverified premise is theatre.
 
 ## Persistent state (`.veritas/`)
 
-Auto-created on first write. Plain text and JSON so humans and any future assistant can read it without a live session.
+Auto-created on first write. Shared by all pillars. Plain text and JSON.
 
-```
-.veritas/
-├── state.json       # active persona, turn counter, last decision, open questions
-├── LEDGER.md        # rolling assumption ledger: active / stale / retired
-├── audit.log        # append-only Sentinel gate decisions
-├── HANDOFF.md       # canonical session scroll (overwritten per snapshot)
-├── LESSONS.md       # postmortem entries with EXPIRES
-└── DECISIONS.md     # architectural decision journal with "revisit when"
-```
+| File | Purpose | Pillar(s) |
+|---|---|---|
+| `state.json` | Active role, turn counters, last decision | all |
+| `claims.jsonl` | Provenance DAG of claims with `depends_on`, `evidence[].fingerprint` | plan, verify, guardrail |
+| `actions.jsonl` | Hash-chained log of gate decisions (tamper-evident) | execute, guardrail |
+| `history.jsonl` | Approved actions; feeds recency component of risk score | execute, guardrail |
+| `HANDOFF.md` | Canonical session scroll (committed to git) | all |
+| `LESSONS.md` | Non-obvious lessons with `EXPIRES` | guardrail |
+| `DECISIONS.md` | Architectural decisions with `Revisit when` | plan, design |
+| `private/` | Gitignored; user-scoped secrets only | any |
 
-See [`modules/ledger.md`](modules/ledger.md) for the read-order on resume and the promotion rules (how `unverified` claims age into `stale` and then `retired`).
+Read order on resume: `state.json` → `HANDOFF.md` → `claims.jsonl` (check stale) → `actions.jsonl` (tail + verify chain) → `DECISIONS.md` (only if next step touches a recorded decision).
 
----
+## Scripts
+
+- `scripts/verify-claim.py` — path / symbol / version grounding checks.
+- `scripts/track-claims.py` — add, verify, retire, invalidate-changed (cascade).
+- `scripts/log-actions.py` — append, verify, tail the hash-chained action log.
+- `scripts/score-risk.py` — deterministic risk score for a proposed action.
+- `scripts/track-state.py` — init, set-role, migrate the state directory.
+
+All zero-dependency Python. Runnable directly; no install step for the scripts themselves.
 
 ## Invariants
 
-- Veritas never edits source code to "fix" a claim. It only verifies, reports, and gates.
-- Veritas never fabricates file paths, symbol names, or line numbers. If a claim cannot be grounded, the correct output is "not verified" — not a confident guess.
-- Rollback plans must reference real commits, real files, or real backups. Hypothetical rollbacks are not rollbacks.
-- Postmortems record what was **surprising**, not what was routine. Most sessions produce zero entries.
-- `audit.log` is append-only. A history of declined actions is itself evidence.
+- Veritas **never fabricates** file paths, symbol names, line numbers, versions, or commit hashes. Unverifiable claims are marked unverified, not smoothed into prose.
+- Veritas **never bypasses** a gate to "save time". Time saved by skipping a gate is interest borrowed against a future failure.
+- Veritas **rollbacks must reference** a real commit, backup, snapshot, or compensating action. Hypothetical rollbacks are not rollbacks.
+- Veritas **records are append-where-it-matters.** `actions.jsonl` is hash-chained; editing past entries breaks the chain and is detectable.
+- Veritas **stays dormant** when no trigger fires. Exploring, reading, explaining — these are not triggers.
 
----
+## What Veritas does not do
 
-## Entry flow
-
-1. Detect the trigger (see `data/trigger-verbs.csv` and the action gate in `data/risky-ops.csv`).
-2. Route to at most one persona (see `modules/persona.md`). Priority: Sentinel > Skeptic > Archivist.
-3. Run the persona's default module. Follow its checklist. Produce the structured block it specifies.
-4. Write the state effect to `.veritas/` (ledger entry, audit-log line, or scroll snapshot).
-5. If the checklist cannot be completed (missing access, unverified claim, no rollback), stop. Report the gap. Do not proceed past the gate.
-
----
-
-## What Veritas deliberately does not do
-
-- Does not write plans, roadmaps, phases, PRDs, or stories.
-- Does not generate UI, designs, architectures, or tests.
-- Does not run builds, deployments, or migrations on its own.
-- Does not replace the user's judgement — it surfaces the data the user needs to judge.
+- Does not run builds, deployments, migrations, or shell commands on its own. It gates and advises; the assistant executes.
+- Does not replace the user's judgement. Every pillar surfaces the data the user needs to judge.
+- Does not track telemetry, call home, or require network access. Every artifact is local and plaintext.

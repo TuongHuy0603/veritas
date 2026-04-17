@@ -1,73 +1,86 @@
 {
   "claude": {
     "label": "Claude Code",
-    "target": "~/.claude/skills/veritas",
+    "skill_target": "~/.claude/skills/veritas",
+    "commands_target": "~/.claude/commands",
     "layout": "skill-folder",
-    "notes": "Global skill — available across all Claude Code sessions."
+    "notes": "Global skill. Slash commands land in ~/.claude/commands as plan.md, design.md, etc."
   },
   "cursor": {
     "label": "Cursor",
-    "target": ".cursor/rules/veritas",
-    "layout": "rules-folder",
-    "notes": "Project-scoped. Rename SKILL.md to veritas.mdc on install."
+    "skill_target": ".cursor/rules",
+    "commands_target": ".cursor/rules",
+    "layout": "cursor-mdc",
+    "notes": "Project-scoped. SKILL.md becomes veritas.mdc at .cursor/rules/ (flat, not nested)."
   },
   "windsurf": {
     "label": "Windsurf",
-    "target": ".windsurf/rules/veritas",
+    "skill_target": ".windsurf/rules/veritas",
+    "commands_target": ".windsurf/commands",
     "layout": "rules-folder",
     "notes": "Project-scoped rules."
   },
   "copilot": {
     "label": "GitHub Copilot",
-    "target": ".github/copilot/veritas",
-    "layout": "prompt-folder",
-    "notes": "Invoked as /veritas in Copilot Chat."
+    "skill_target": ".github/prompts",
+    "commands_target": ".github/prompts",
+    "layout": "prompt-files",
+    "notes": "Each command becomes a .prompt.md file in .github/prompts/."
   },
   "codex": {
     "label": "OpenAI Codex CLI",
-    "target": "~/.codex/skills/veritas",
+    "skill_target": "~/.codex/skills/veritas",
+    "commands_target": "~/.codex/commands",
     "layout": "skill-folder"
   },
   "gemini": {
     "label": "Gemini CLI",
-    "target": "~/.gemini/skills/veritas",
+    "skill_target": "~/.gemini/skills/veritas",
+    "commands_target": "~/.gemini/commands",
     "layout": "skill-folder"
   },
   "continue": {
     "label": "Continue.dev",
-    "target": ".continue/rules/veritas",
+    "skill_target": ".continue/rules/veritas",
+    "commands_target": ".continue/slash",
     "layout": "rules-folder"
   },
   "roocode": {
     "label": "Roo Code",
-    "target": ".roo/rules/veritas",
+    "skill_target": ".roo/rules/veritas",
+    "commands_target": ".roo/commands",
     "layout": "rules-folder"
   },
   "kilocode": {
     "label": "Kilo Code",
-    "target": ".kilocode/rules/veritas",
+    "skill_target": ".kilocode/rules/veritas",
+    "commands_target": ".kilocode/commands",
     "layout": "rules-folder"
   },
   "opencode": {
     "label": "OpenCode",
-    "target": ".opencode/skills/veritas",
+    "skill_target": "~/.opencode/skills/veritas",
+    "commands_target": "~/.opencode/commands",
     "layout": "skill-folder"
   },
   "trae": {
     "label": "Trae",
-    "target": ".trae/skills/veritas",
+    "skill_target": ".trae/skills/veritas",
+    "commands_target": ".trae/commands",
     "layout": "skill-folder",
     "notes": "Switch to SOLO mode for auto-activation."
   },
   "warp": {
     "label": "Warp",
-    "target": "~/.warp/skills/veritas",
+    "skill_target": "~/.warp/skills/veritas",
+    "commands_target": "~/.warp/commands",
     "layout": "skill-folder"
   },
   "kiro": {
     "label": "Kiro",
-    "target": ".kiro/commands/veritas",
+    "skill_target": ".kiro/skills/veritas",
+    "commands_target": ".kiro/commands",
     "layout": "command-folder",
-    "notes": "Invoked as /veritas."
+    "notes": "Each slash command lands in .kiro/commands/ as a top-level file."
   }
 }
