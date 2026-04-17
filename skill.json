@@ -1,0 +1,42 @@
+{
+  "name": "veritas",
+  "displayName": "Veritas — Truth, Risk, Continuity, Learning",
+  "description": "A guardrail layer for AI-assisted coding. Grounds claims in real code before asserting them, gates risky actions by blast radius and reversibility, produces canonical session handoffs, and captures non-obvious lessons. Auto-activates on assertions, destructive operations, session boundaries, and corrections.",
+  "version": "0.1.0",
+  "author": "TuongHuy0603",
+  "license": "MIT",
+  "repository": "https://github.com/TuongHuy0603/veritas",
+  "keywords": [
+    "ai-skill",
+    "guardrails",
+    "hallucination",
+    "verification",
+    "risk-management",
+    "session-handoff",
+    "postmortem",
+    "grounding"
+  ],
+  "platforms": [
+    "claude",
+    "cursor",
+    "windsurf",
+    "copilot",
+    "codex",
+    "gemini",
+    "continue",
+    "roocode",
+    "kilocode",
+    "opencode",
+    "trae",
+    "warp",
+    "kiro"
+  ],
+  "install": "npx veritas-cli init --ai {{platform}}",
+  "entrypoint": "src/veritas/SKILL.md",
+  "modules": [
+    "src/veritas/modules/ground-check.md",
+    "src/veritas/modules/blast-radius.md",
+    "src/veritas/modules/handoff.md",
+    "src/veritas/modules/postmortem.md"
+  ]
+}

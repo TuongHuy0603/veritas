@@ -1,0 +1,73 @@
+{
+  "claude": {
+    "label": "Claude Code",
+    "target": "~/.claude/skills/veritas",
+    "layout": "skill-folder",
+    "notes": "Global skill — available across all Claude Code sessions."
+  },
+  "cursor": {
+    "label": "Cursor",
+    "target": ".cursor/rules/veritas",
+    "layout": "rules-folder",
+    "notes": "Project-scoped. Rename SKILL.md to veritas.mdc on install."
+  },
+  "windsurf": {
+    "label": "Windsurf",
+    "target": ".windsurf/rules/veritas",
+    "layout": "rules-folder",
+    "notes": "Project-scoped rules."
+  },
+  "copilot": {
+    "label": "GitHub Copilot",
+    "target": ".github/copilot/veritas",
+    "layout": "prompt-folder",
+    "notes": "Invoked as /veritas in Copilot Chat."
+  },
+  "codex": {
+    "label": "OpenAI Codex CLI",
+    "target": "~/.codex/skills/veritas",
+    "layout": "skill-folder"
+  },
+  "gemini": {
+    "label": "Gemini CLI",
+    "target": "~/.gemini/skills/veritas",
+    "layout": "skill-folder"
+  },
+  "continue": {
+    "label": "Continue.dev",
+    "target": ".continue/rules/veritas",
+    "layout": "rules-folder"
+  },
+  "roocode": {
+    "label": "Roo Code",
+    "target": ".roo/rules/veritas",
+    "layout": "rules-folder"
+  },
+  "kilocode": {
+    "label": "Kilo Code",
+    "target": ".kilocode/rules/veritas",
+    "layout": "rules-folder"
+  },
+  "opencode": {
+    "label": "OpenCode",
+    "target": ".opencode/skills/veritas",
+    "layout": "skill-folder"
+  },
+  "trae": {
+    "label": "Trae",
+    "target": ".trae/skills/veritas",
+    "layout": "skill-folder",
+    "notes": "Switch to SOLO mode for auto-activation."
+  },
+  "warp": {
+    "label": "Warp",
+    "target": "~/.warp/skills/veritas",
+    "layout": "skill-folder"
+  },
+  "kiro": {
+    "label": "Kiro",
+    "target": ".kiro/commands/veritas",
+    "layout": "command-folder",
+    "notes": "Invoked as /veritas."
+  }
+}

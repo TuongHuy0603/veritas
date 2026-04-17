@@ -1,0 +1,11 @@
+{
+  "name": "veritas",
+  "version": "0.1.0",
+  "description": "Guardrail layer: grounds claims, gates risky actions, writes handoffs, captures lessons.",
+  "skills": [
+    {
+      "name": "veritas",
+      "path": "../src/veritas/SKILL.md"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "name": "veritas-skill",
+  "version": "0.1.0",
+  "description": "A guardrail skill for AI-assisted coding: grounds claims, gates risky actions, writes handoffs, captures lessons.",
+  "bin": {
+    "veritas-cli": "./cli/index.js"
+  },
+  "main": "./cli/index.js",
+  "type": "commonjs",
+  "files": [
+    "src/",
+    "cli/",
+    "skill.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=16"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TuongHuy0603/veritas"
+  },
+  "homepage": "https://github.com/TuongHuy0603/veritas",
+  "bugs": {
+    "url": "https://github.com/TuongHuy0603/veritas/issues"
+  },
+  "license": "MIT",
+  "author": "TuongHuy0603",
+  "keywords": [
+    "ai-skill",
+    "guardrails",
+    "hallucination",
+    "verification",
+    "risk-management",
+    "session-handoff",
+    "postmortem",
+    "claude",
+    "cursor",
+    "windsurf",
+    "copilot"
+  ]
+}

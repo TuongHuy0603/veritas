@@ -1,0 +1,32 @@
+verb,module,note
+verify,ground-check,explicit request to confirm a claim
+check,ground-check,explicit request to confirm a claim
+confirm,ground-check,explicit request to confirm a claim
+does X exist,ground-check,existence question about symbol or file
+is it true that,ground-check,truth question about code behavior
+what does X do,ground-check,behavior question — must read the body
+what version,ground-check,version question — must read manifest
+is it safe to,blast-radius,user is pausing before action
+can I just,blast-radius,often precedes a destructive shortcut
+delete,blast-radius,destructive verb
+drop,blast-radius,destructive verb — schema or table
+truncate,blast-radius,destructive verb — data loss
+force push,blast-radius,history rewrite on shared branch
+reset hard,blast-radius,local history loss
+rm -rf,blast-radius,filesystem deletion
+migrate,blast-radius,schema change — check reversibility
+rollback,blast-radius,user is reversing — verify rollback path is real
+undo,blast-radius,user is reversing
+pause,handoff,session boundary — write scroll
+handoff,handoff,explicit handoff request
+switch tool,handoff,cross-AI transfer
+save state,handoff,session boundary
+continue previous,handoff,resume — read scroll first
+resume,handoff,resume — read scroll first
+pick up where,handoff,resume
+that was wrong,postmortem,correction — candidate lesson
+no not that,postmortem,correction — candidate lesson
+actually,postmortem,correction marker — check if surprising
+we got burned,postmortem,prior incident — high-value lesson
+save that,postmortem,explicit lesson request
+remember this,postmortem,explicit lesson request
