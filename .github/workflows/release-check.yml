@@ -1,0 +1,51 @@
+name: Release version check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Ensures all version strings across metadata files agree with each other
+# so v1.0.1 never ends up shipping with package.json saying 1.0.0.
+
+jobs:
+  versions-match:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compare version strings
+        run: |
+          python - <<'EOF'
+          import json, re, sys
+          from pathlib import Path
+
+          versions = {}
+
+          def j(path, key):
+              data = json.loads(Path(path).read_text())
+              return data.get(key)
+
+          versions["skill.json"]             = j("skill.json", "version")
+          versions["package.json"]           = j("package.json", "version")
+          versions["cli/package.json"]       = j("cli/package.json", "version")
+          versions[".claude-plugin/plugin.json"] = j(".claude-plugin/plugin.json", "version")
+
+          skill_md = Path("src/veritas/SKILL.md").read_text()
+          m = re.search(r"^version:\s*([\w\.\-]+)", skill_md, flags=re.MULTILINE)
+          versions["src/veritas/SKILL.md (frontmatter)"] = m.group(1) if m else None
+
+          print("Versions seen:")
+          for k, v in versions.items():
+              print(f"  {k:<45} {v}")
+
+          distinct = {v for v in versions.values() if v}
+          if len(distinct) != 1:
+              print(f"\nMISMATCH: {distinct}", file=sys.stderr)
+              sys.exit(1)
+          print(f"\nAll agree on {distinct.pop()}.")
+          EOF

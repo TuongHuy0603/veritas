@@ -182,9 +182,15 @@ function cmdUninstall(platform) {
         }
       }
     }
-    // Cursor flat-skill files prefixed with veritas- live in the same dir.
+    // Cursor flat-skill files live in the same dir as commands:
+    //   veritas.mdc                          (SKILL entrypoint)
+    //   veritas-<type>-<name>.mdc            (flattened modules/personas/pillars)
+    //   veritas-<command>.mdc                (slash commands)
     for (const file of fs.readdirSync(commandsTarget)) {
-      if (file.startsWith("veritas-") && file.endsWith(".mdc")) {
+      if (
+        (file === "veritas.mdc") ||
+        (file.startsWith("veritas-") && file.endsWith(".mdc"))
+      ) {
         const p = path.join(commandsTarget, file);
         fs.unlinkSync(p);
         console.log(`Removed ${p}`);

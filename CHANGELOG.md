@@ -2,6 +2,27 @@
 
 All notable changes to this project. Dates are UTC.
 
+## [1.0.2] — 2026-04-17
+
+Patch: CI, Node CLI test suite, and two more bugs caught by the new tests.
+
+### Added
+
+- **`tests-cli/cli.test.js`** — Node test suite for `cli/index.js`. Uses the built-in `node:test` runner (Node 18+), sandboxed `HOME`/`USERPROFILE`, temporary project dirs. Seven tests covering list, Claude / Cursor / Copilot install layouts, unknown platform, and both uninstall paths.
+- **`.github/workflows/ci.yml`** — CI on every push and PR:
+  - pytest on Python 3.10 / 3.11 / 3.12 (Ubuntu)
+  - `node --test` on Node 18 / 20 / 22 across Ubuntu, macOS, Windows
+  - JSON schema validation for all metadata files
+  - Smoke tests for every script: verify-claim, score-risk, track-state, log-actions
+- **`.github/workflows/release-check.yml`** — fails the build when version strings in `skill.json`, `package.json`, `cli/package.json`, `.claude-plugin/plugin.json`, and `SKILL.md` front-matter disagree. Keeps bumps from drifting.
+
+### Fixed
+
+- **Cursor install placed `veritas.mdc` at `.cursor/veritas.mdc`** (one level too high — `path.dirname(skillDir)` of `.cursor/rules` is `.cursor`). The adapter now uses a staging subdir (`.cursor/rules/_veritas-stage`) so the `dirname` dereference lands back in `.cursor/rules/`. Caught by the Node test `init --ai cursor flattens …`.
+- **Uninstall did not remove `.cursor/rules/veritas.mdc`** — the cleanup loop only matched `veritas-*.mdc` (dash), not the bare entrypoint. The loop now also removes `veritas.mdc`. Caught by `uninstall --ai cursor removes flat veritas-*.mdc files`.
+
+---
+
 ## [1.0.1] — 2026-04-17
 
 Patch release: bug fixes from the post-release code review. No behavior changes to the pillar model.

@@ -1,0 +1,104 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  python-tests:
+    name: pytest
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install pytest
+        run: pip install --quiet pytest
+      - name: Run pytest
+        run: pytest tests/ -v --tb=short
+
+  node-tests:
+    name: node --test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node-version: ["18", "20", "22"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Run CLI tests
+        run: node --test tests-cli/cli.test.js
+
+  json-validate:
+    name: JSON validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate JSON files
+        run: |
+          python -c "
+          import json, sys
+          files = [
+              'skill.json',
+              'package.json',
+              'cli/package.json',
+              'cli/adapters.json',
+              '.claude-plugin/plugin.json',
+              'src/veritas/state/schema.json',
+          ]
+          for f in files:
+              try:
+                  json.load(open(f))
+                  print(f'OK {f}')
+              except Exception as e:
+                  print(f'FAIL {f}: {e}')
+                  sys.exit(1)
+          "
+
+  verify-scripts:
+    name: smoke test scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: verify-claim smoke
+        run: |
+          python src/veritas/scripts/verify-claim.py path README.md
+          python src/veritas/scripts/verify-claim.py version package.json veritas-skill
+      - name: score-risk smoke
+        run: |
+          python src/veritas/scripts/score-risk.py "git commit" --branch feature/x --rev abc1234 --authz yes
+          python src/veritas/scripts/score-risk.py "terraform destroy" --branch main --rev NONE --authz no
+      - name: track-state init + checksum
+        run: |
+          mkdir scratch && cd scratch
+          python ../src/veritas/scripts/track-state.py init
+          python ../src/veritas/scripts/track-state.py set-role risk-guard
+          python ../src/veritas/scripts/track-state.py set-pillar execute
+          python ../src/veritas/scripts/track-state.py checksum
+          python ../src/veritas/scripts/track-state.py show
+      - name: log-actions chain verify
+        run: |
+          cd scratch
+          python ../src/veritas/scripts/log-actions.py append proceed "git commit" --rev abc1234 --authz yes
+          python ../src/veritas/scripts/log-actions.py append pause-for-confirmation "DROP TABLE sessions" --rev NONE --authz ambiguous
+          python ../src/veritas/scripts/log-actions.py verify

@@ -1,6 +1,6 @@
 {
   "name": "veritas-skill",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A five-pillar builder and guardrail for AI-assisted coding. Plan, design, execute, verify — with a shared provenance DAG, hash-chained action log, and canonical session handoff.",
   "bin": {
     "veritas-cli": "./cli/index.js"

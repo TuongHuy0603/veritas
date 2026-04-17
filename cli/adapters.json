@@ -8,10 +8,10 @@
   },
   "cursor": {
     "label": "Cursor",
-    "skill_target": ".cursor/rules",
+    "skill_target": ".cursor/rules/_veritas-stage",
     "commands_target": ".cursor/rules",
     "layout": "cursor-mdc",
-    "notes": "Project-scoped. SKILL.md becomes veritas.mdc at .cursor/rules/ (flat, not nested)."
+    "notes": "Project-scoped. SKILL.md becomes .cursor/rules/veritas.mdc; modules/personas/pillars flatten to .cursor/rules/veritas-<type>-<name>.mdc; staging folder is removed on finish."
   },
   "windsurf": {
     "label": "Windsurf",
