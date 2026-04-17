@@ -1,32 +1,40 @@
-verb,module,note
-verify,ground-check,explicit request to confirm a claim
-check,ground-check,explicit request to confirm a claim
-confirm,ground-check,explicit request to confirm a claim
-does X exist,ground-check,existence question about symbol or file
-is it true that,ground-check,truth question about code behavior
-what does X do,ground-check,behavior question — must read the body
-what version,ground-check,version question — must read manifest
-is it safe to,blast-radius,user is pausing before action
-can I just,blast-radius,often precedes a destructive shortcut
-delete,blast-radius,destructive verb
-drop,blast-radius,destructive verb — schema or table
-truncate,blast-radius,destructive verb — data loss
-force push,blast-radius,history rewrite on shared branch
-reset hard,blast-radius,local history loss
-rm -rf,blast-radius,filesystem deletion
-migrate,blast-radius,schema change — check reversibility
-rollback,blast-radius,user is reversing — verify rollback path is real
-undo,blast-radius,user is reversing
-pause,handoff,session boundary — write scroll
-handoff,handoff,explicit handoff request
-switch tool,handoff,cross-AI transfer
-save state,handoff,session boundary
-continue previous,handoff,resume — read scroll first
-resume,handoff,resume — read scroll first
-pick up where,handoff,resume
-that was wrong,postmortem,correction — candidate lesson
-no not that,postmortem,correction — candidate lesson
-actually,postmortem,correction marker — check if surprising
-we got burned,postmortem,prior incident — high-value lesson
-save that,postmortem,explicit lesson request
-remember this,postmortem,explicit lesson request
+verb,persona,module,note
+verify,skeptic,ground-check,explicit request to confirm a claim
+check,skeptic,ground-check,explicit request to confirm a claim
+confirm,skeptic,ground-check,explicit request to confirm a claim
+does X exist,skeptic,ground-check,existence question about symbol or file
+is it true that,skeptic,ground-check,truth question about code behavior
+what does X do,skeptic,ground-check,behavior question — must read the body
+what version,skeptic,ground-check,version question — must read manifest
+I think,skeptic,ground-check,confident assertion without stated evidence
+should be,skeptic,ground-check,confident assertion without stated evidence
+probably,skeptic,ground-check,hedged claim that is about to be treated as fact
+is it safe to,sentinel,blast-radius,user is pausing before action
+can I just,sentinel,blast-radius,often precedes a destructive shortcut
+I'll just,sentinel,blast-radius,speed-up phrasing — red flag for Sentinel
+let me quickly,sentinel,blast-radius,speed-up phrasing — red flag for Sentinel
+delete,sentinel,blast-radius,destructive verb
+drop,sentinel,blast-radius,destructive verb — schema or table
+truncate,sentinel,blast-radius,destructive verb — data loss
+force push,sentinel,blast-radius,history rewrite on shared branch
+reset hard,sentinel,blast-radius,local history loss
+rm -rf,sentinel,blast-radius,filesystem deletion
+migrate,sentinel,blast-radius,schema change — check reversibility
+rollback,sentinel,blast-radius,user is reversing — verify rollback path is real
+undo,sentinel,blast-radius,user is reversing
+pause,archivist,handoff,session boundary — write scroll
+handoff,archivist,handoff,explicit handoff request
+switch tool,archivist,handoff,cross-AI transfer
+save state,archivist,handoff,session boundary
+continue previous,archivist,handoff,resume — read scroll first
+resume,archivist,handoff,resume — read scroll first
+pick up where,archivist,handoff,resume
+that was wrong,archivist,postmortem,correction — candidate lesson
+no not that,archivist,postmortem,correction — candidate lesson
+actually,archivist,postmortem,correction marker — check if surprising
+we got burned,archivist,postmortem,prior incident — high-value lesson
+save that,archivist,postmortem,explicit lesson request
+remember this,archivist,postmortem,explicit lesson request
+we decided,archivist,ledger,decision with reason — candidate for DECISIONS.md
+because,archivist,ledger,reason clause — may promote a decision entry
+revisit when,archivist,ledger,explicit expiry clause on a decision

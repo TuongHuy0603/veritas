@@ -1,8 +1,8 @@
 {
   "name": "veritas",
   "displayName": "Veritas — Truth, Risk, Continuity, Learning",
-  "description": "A guardrail layer for AI-assisted coding. Grounds claims in real code before asserting them, gates risky actions by blast radius and reversibility, produces canonical session handoffs, and captures non-obvious lessons. Auto-activates on assertions, destructive operations, session boundaries, and corrections.",
-  "version": "0.1.0",
+  "description": "A guardrail layer for AI-assisted coding. Three personas (Skeptic, Sentinel, Archivist), six modules, and a persistent .veritas/ state directory. Grounds claims in real code before asserting, gates risky actions by blast radius and reversibility, produces canonical handoffs, captures non-obvious lessons, and carries state across sessions.",
+  "version": "0.2.0",
   "author": "TuongHuy0603",
   "license": "MIT",
   "repository": "https://github.com/TuongHuy0603/veritas",
@@ -14,7 +14,9 @@
     "risk-management",
     "session-handoff",
     "postmortem",
-    "grounding"
+    "grounding",
+    "persona",
+    "context-persistence"
   ],
   "platforms": [
     "claude",
@@ -33,10 +35,18 @@
   ],
   "install": "npx veritas-cli init --ai {{platform}}",
   "entrypoint": "src/veritas/SKILL.md",
+  "personas": [
+    "src/veritas/personas/skeptic.md",
+    "src/veritas/personas/sentinel.md",
+    "src/veritas/personas/archivist.md"
+  ],
   "modules": [
     "src/veritas/modules/ground-check.md",
     "src/veritas/modules/blast-radius.md",
     "src/veritas/modules/handoff.md",
-    "src/veritas/modules/postmortem.md"
-  ]
+    "src/veritas/modules/postmortem.md",
+    "src/veritas/modules/persona.md",
+    "src/veritas/modules/ledger.md"
+  ],
+  "state_directory": ".veritas"
 }

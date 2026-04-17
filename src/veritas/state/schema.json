@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/TuongHuy0603/veritas/state/schema.json",
+  "title": "Veritas state.json",
+  "description": "Per-project persistent state for the Veritas skill.",
+  "type": "object",
+  "required": ["version", "active_persona", "turn", "updated_at"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Veritas version that wrote this file.",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "active_persona": {
+      "type": ["string", "null"],
+      "enum": ["skeptic", "sentinel", "archivist", null]
+    },
+    "turn": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Monotonically increasing turn counter for this project."
+    },
+    "last_gate_decision": {
+      "type": ["string", "null"],
+      "enum": ["proceed", "pause-for-confirmation", "abort", null]
+    },
+    "last_claim_status": {
+      "type": ["string", "null"],
+      "enum": ["verified", "unverified", "partial", null]
+    },
+    "open_questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["question", "opened_at"],
+        "properties": {
+          "question": { "type": "string" },
+          "opened_at": { "type": "string", "format": "date-time" },
+          "owner": { "type": "string" }
+        }
+      }
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

@@ -1,11 +1,11 @@
 # Veritas
 
-A guardrail skill for AI-assisted coding. One install, four responsibilities:
+A guardrail skill for AI-assisted coding. Three personas, six modules, one persistent state directory:
 
-1. **Ground claims** — before the assistant states a fact about your code, verify it.
-2. **Gate actions** — before a destructive or shared-state action, check blast radius and reversibility.
-3. **Hand off cleanly** — when a session ends, write a canonical scroll; on resume, read it first.
-4. **Capture lessons** — only record what was actually surprising. Most sessions produce none.
+1. **Ground claims** — before the assistant states a fact about your code, verify it. *Persona: Skeptic.*
+2. **Gate actions** — before a destructive or shared-state action, check blast radius and reversibility. *Persona: Sentinel.*
+3. **Hand off and resume** — write a canonical scroll on pause; read it first on resume. *Persona: Archivist.*
+4. **Carry context across sessions** — a per-project `.veritas/` directory holds the ledger, audit log, handoff, lessons, and decisions so state survives compactions and tool switches.
 
 Veritas does not plan features, generate designs, or run workflows. It sits above any planning or execution layer you already use and intervenes at four specific moments.
 
@@ -35,6 +35,15 @@ mkdir -p ~/.claude/skills/veritas
 cp -r veritas/src/veritas/* ~/.claude/skills/veritas/
 ```
 
+### Initialize per-project state (optional but recommended)
+
+```bash
+cd your-project/
+python path/to/veritas/src/veritas/scripts/state.py init
+```
+
+This creates `.veritas/` with empty scaffolding. The assistant can create it lazily too, but running `init` up front makes the ledger visible immediately.
+
 ### Uninstall
 
 ```bash
@@ -43,22 +52,37 @@ npx veritas-cli uninstall --ai <platform>
 
 ---
 
-## How activation works
+## Personas
 
-Veritas auto-activates when the assistant's next action matches one of four triggers. You do not invoke it with a slash command — it invokes itself.
+Each turn routes to at most one persona. A persona is a disposition — a stance, opening moves, and a set of refusals — not a separate agent.
 
-| Trigger | Module |
-|---|---|
-| Assistant is about to state a factual claim about code | `ground-check` |
-| Assistant is about to execute a risky or irreversible operation | `blast-radius` |
-| User pauses, resumes, or switches tools | `handoff` |
-| Task completed, or a mistake was just corrected | `postmortem` |
+| Persona | Activates on | Default module | Writes to |
+|---|---|---|---|
+| **[Skeptic](src/veritas/personas/skeptic.md)** | Load-bearing claim about code | `ground-check` | `.veritas/LEDGER.md` |
+| **[Sentinel](src/veritas/personas/sentinel.md)** | Risky or irreversible action | `blast-radius` | `.veritas/audit.log` |
+| **[Archivist](src/veritas/personas/archivist.md)** | Session boundary, decision, correction | `handoff`, `postmortem`, `ledger` | `.veritas/HANDOFF.md`, `LESSONS.md`, `DECISIONS.md` |
 
-Trigger verbs and risky-operation patterns are in [`src/veritas/data/`](src/veritas/data/). The main routing logic is in [`src/veritas/SKILL.md`](src/veritas/SKILL.md).
+Priority when two triggers fire: **Sentinel → Skeptic → Archivist**. Routing logic lives in [`modules/persona.md`](src/veritas/modules/persona.md).
 
 ---
 
-## The four modules
+## How activation works
+
+Veritas auto-activates when the assistant's next action matches a trigger. You do not invoke it with a slash command — it invokes itself.
+
+| Trigger | Persona | Module |
+|---|---|---|
+| Assistant is about to state a factual claim about code | Skeptic | `ground-check` |
+| Assistant is about to execute a risky or irreversible operation | Sentinel | `blast-radius` |
+| User pauses, resumes, or switches tools | Archivist | `handoff` |
+| Task completed, or a mistake was just corrected | Archivist | `postmortem` |
+| Decision made with a real reason | Archivist | `ledger` |
+
+Trigger verbs are in [`src/veritas/data/trigger-verbs.csv`](src/veritas/data/trigger-verbs.csv). Risky-op patterns are in [`src/veritas/data/risky-ops.csv`](src/veritas/data/risky-ops.csv).
+
+---
+
+## The six modules
 
 ### `ground-check` — anti-hallucination
 
@@ -70,15 +94,43 @@ Before `rm -rf`, `DROP TABLE`, `git push --force`, `terraform destroy`, or any s
 
 ### `handoff` — cross-session continuity
 
-One page, canonical format, written to `HANDOFF.md`. Includes goal, state, decisions with reasons, open questions, exact next step, and a **do-not** list (the most expensive part of resuming is rediscovering dead ends). Portable across tools. See [`modules/handoff.md`](src/veritas/modules/handoff.md).
+One page, canonical format, written to `HANDOFF.md`. Goal, state, decisions with reasons, open questions, exact next step, and a **do-not** list (rediscovering dead ends is the most expensive part of resuming). Portable across tools. See [`modules/handoff.md`](src/veritas/modules/handoff.md).
 
 ### `postmortem` — lesson capture
 
 The filter: *would a future session, with no memory of today, be worse off without this entry?* If no, write nothing. Record only what contradicts a default, encodes a hidden constraint, or cost real time. Every entry has an `EXPIRES` field. See [`modules/postmortem.md`](src/veritas/modules/postmortem.md).
 
+### `persona` — routing
+
+One turn, zero or one persona. Specifies the priority order when multiple triggers fire and the state effects each persona writes. See [`modules/persona.md`](src/veritas/modules/persona.md).
+
+### `ledger` — persistent state
+
+Reads and writes the `.veritas/` directory: assumption ledger with active/stale/retired promotion, append-only audit log for gate decisions, handoff scroll, lessons, decisions journal. Specifies the resume read-order. See [`modules/ledger.md`](src/veritas/modules/ledger.md).
+
 ---
 
-## Helper script
+## Persistent state (`.veritas/`)
+
+Auto-created on first write. Plain text and JSON so any future reader — human or assistant — can use it without a live session.
+
+```
+.veritas/
+├── state.json       # active persona, turn counter, last decision, open questions
+├── LEDGER.md        # rolling assumption ledger: active / stale / retired
+├── audit.log        # append-only Sentinel gate decisions
+├── HANDOFF.md       # canonical session scroll (overwritten per snapshot)
+├── LESSONS.md       # postmortem entries with EXPIRES
+└── DECISIONS.md     # architectural decisions with "revisit when"
+```
+
+**Promotion rules:** `unverified` ledger entries older than 24 hours become `stale`; `stale` older than 7 days becomes `retired`. `verified` stays active until a code change contradicts it, then moves straight to `retired`.
+
+**Schema** for `state.json`: [`src/veritas/state/schema.json`](src/veritas/state/schema.json).
+
+---
+
+## Helper scripts
 
 `src/veritas/scripts/verify.py` — zero-dependency grounding helpers:
 
@@ -88,7 +140,16 @@ python verify.py symbol src/foo.py my_function
 python verify.py version package.json react
 ```
 
-Exit `0` if verified, `1` if not.
+`src/veritas/scripts/state.py` — zero-dependency state helpers:
+
+```bash
+python state.py init
+python state.py set-persona sentinel
+python state.py audit pause-for-confirmation "DROP TABLE sessions" --rev NONE --authz ambiguous
+python state.py show
+```
+
+Exit `0` on success, `1` on not-verified or bad input.
 
 ---
 
@@ -103,16 +164,27 @@ veritas/
 │   └── package.json
 ├── src/veritas/
 │   ├── SKILL.md
+│   ├── personas/
+│   │   ├── skeptic.md
+│   │   ├── sentinel.md
+│   │   └── archivist.md
 │   ├── modules/
 │   │   ├── ground-check.md
 │   │   ├── blast-radius.md
 │   │   ├── handoff.md
-│   │   └── postmortem.md
+│   │   ├── postmortem.md
+│   │   ├── persona.md
+│   │   └── ledger.md
 │   ├── data/
 │   │   ├── risky-ops.csv
 │   │   └── trigger-verbs.csv
+│   ├── state/
+│   │   └── schema.json
 │   └── scripts/
-│       └── verify.py
+│       ├── verify.py
+│       └── state.py
+├── docs/
+│   └── ACTIVATION.md
 ├── package.json
 ├── skill.json
 ├── README.md
@@ -124,10 +196,12 @@ veritas/
 
 ## Design principles
 
-- **Small surface.** Four modules, one decision tree. If a task does not hit a trigger, the skill stays dormant.
+- **Small surface.** Six modules, three personas, one decision tree. If a task does not hit a trigger, the skill stays dormant.
 - **No fabrication.** If a claim cannot be grounded, the correct answer is "not verified".
 - **Reversibility is a real reference.** A rollback plan must point to a commit, backup, or compensating action — never a hypothesis.
+- **State is plaintext.** `.veritas/` is human-readable markdown and JSON; no database, no daemon, no network.
 - **Silence beats noise.** Most sessions produce zero postmortem entries. That is the target.
+- **Append-only where it matters.** `audit.log` records declined actions — history of things *not* done is itself evidence.
 
 ---
 

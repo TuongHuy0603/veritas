@@ -1,7 +1,7 @@
 {
   "name": "veritas-skill",
-  "version": "0.1.0",
-  "description": "A guardrail skill for AI-assisted coding: grounds claims, gates risky actions, writes handoffs, captures lessons.",
+  "version": "0.2.0",
+  "description": "A guardrail skill for AI-assisted coding. Three personas, six modules, persistent .veritas/ state. Grounds claims, gates risky actions, writes handoffs, captures lessons, and carries context across sessions.",
   "bin": {
     "veritas-cli": "./cli/index.js"
   },
