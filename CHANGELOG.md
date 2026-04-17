@@ -2,6 +2,30 @@
 
 All notable changes to this project. Dates are UTC.
 
+## [1.0.1] — 2026-04-17
+
+Patch release: bug fixes from the post-release code review. No behavior changes to the pillar model.
+
+### Fixed
+
+- **Critical: `track-state.py init` wrote `"version": "0.3.0"` to `state.json`.** It now writes `"1.0.0"`. Without this fix, migration logic never ran (it only recognized 0.1/0.2 as legacy), so new installs were silently stuck on a pre-release version string.
+- **Critical: Cursor CLI adapter did not rename slash commands to `.mdc`.** Commands installed on Cursor were invisible to its slash-command system. They are now written as `veritas-<name>.mdc` in `.cursor/rules/` and are correctly cleaned up on uninstall.
+- **`verify-claim.py version` now detects a manifest's own `name`/`version` pair,** not only dependency entries. Running `verify-claim.py version package.json <project-name>` works as expected.
+- Docstring and argparse-prog name in `score-risk.py` updated from the old `risk_score.py`; `verify-claim.py` docstring updated from the old `verify.py` / `ground-check` references.
+
+### Changed
+
+- **Trigger data deduplicated.** `trigger-verbs.csv` is now guardrail-only (verifier / risk-guard / session-recorder rows); `pillar-intents.csv` owns pillar routing. Previously both files carried pillar rows, creating two sources of truth.
+- `track-state.py` grows `set-pillar`, `set-phase [--step N]`, and `checksum` commands. The `active_pillar` / `phase` / `step` fields previously existed only in the schema — now the script can set them, matching what `execute` and `save-session` specify.
+- Migration path extended to recognize `0.3.0` as legacy and upgrade it to `1.0.0`.
+
+### Docs
+
+- `commands/handoff.md` points to `track-state.py checksum` for the scroll's required checksum field.
+- `docs/ACTIVATION.md` clarifies that `trigger-verbs.csv` and `pillar-intents.csv` route different things and are not redundant.
+
+---
+
 ## [1.0.0] — 2026-04-17
 
 The guardrail-only beta becomes an umbrella builder. Five pillars, eight slash commands, a provenance DAG, a hash-chained action log, deterministic risk scoring.

@@ -9,14 +9,18 @@ and log-actions.py respectively.
 Usage:
     track-state.py init                            scaffold .veritas/
     track-state.py set-role <verifier|risk-guard|session-recorder|none>
+    track-state.py set-pillar <plan|design|execute|verify|guardrail|none>
+    track-state.py set-phase <phase-name> [--step N]
     track-state.py set-gate <proceed|pause-for-confirmation|abort>
     track-state.py set-claim <verified|unverified|partial>
+    track-state.py checksum                        sha256 of state.json (for HANDOFF)
     track-state.py show                            print current state.json
-    track-state.py migrate                         upgrade a pre-0.3 state.json
+    track-state.py migrate                         upgrade a pre-1.0 state.json
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
 import sys
 from datetime import datetime, timezone
@@ -32,8 +36,10 @@ ACTIONS_FILE = VERITAS_DIR / "actions.jsonl"
 HISTORY_FILE = VERITAS_DIR / "history.jsonl"
 PRIVATE_DIR = VERITAS_DIR / "private"
 
-VERSION = "0.3.0"
+VERSION = "1.0.0"
+LEGACY_VERSIONS = {"0.1.0", "0.2.0", "0.3.0"}
 ROLES = {"verifier", "risk-guard", "session-recorder", "none"}
+PILLARS = {"plan", "design", "execute", "verify", "guardrail", "none"}
 GATE_DECISIONS = {"proceed", "pause-for-confirmation", "abort"}
 CLAIM_STATUSES = {"verified", "unverified", "partial"}
 
@@ -129,6 +135,36 @@ def cmd_set_claim(value: str) -> int:
     return 0
 
 
+def cmd_set_pillar(value: str) -> int:
+    if value not in PILLARS:
+        print(f"Invalid pillar. Expected one of: {sorted(PILLARS)}")
+        return 2
+    state = load_state()
+    state["active_pillar"] = None if value == "none" else value
+    save_state(state)
+    print(f"active_pillar={state['active_pillar']}")
+    return 0
+
+
+def cmd_set_phase(value: str, step: int | None) -> int:
+    state = load_state()
+    state["phase"] = value
+    if step is not None:
+        state["step"] = step
+    save_state(state)
+    print(f"phase={value} step={state.get('step')}")
+    return 0
+
+
+def cmd_checksum() -> int:
+    if not STATE_FILE.exists():
+        print("no state.json", file=sys.stderr)
+        return 1
+    digest = hashlib.sha256(STATE_FILE.read_bytes()).hexdigest()
+    print(digest)
+    return 0
+
+
 def cmd_show() -> int:
     state = load_state()
     print(json.dumps(state, indent=2))
@@ -145,15 +181,19 @@ def cmd_migrate() -> int:
         print(f"cannot read state.json: {e}", file=sys.stderr)
         return 1
     changed = False
-    if state.get("version") in ("0.1.0", "0.2.0"):
+    if state.get("version") in LEGACY_VERSIONS:
         legacy_persona = state.pop("active_persona", None)
         legacy_map = {
             "skeptic": "verifier",
             "sentinel": "risk-guard",
             "archivist": "session-recorder",
         }
-        state["active_role"] = legacy_map.get(legacy_persona) if legacy_persona else None
-        state.setdefault("role_turns", {"verifier": 0, "risk-guard": 0, "session-recorder": 0})
+        if legacy_persona and "active_role" not in state:
+            state["active_role"] = legacy_map.get(legacy_persona)
+        state.setdefault("active_role", None)
+        state.setdefault(
+            "role_turns", {"verifier": 0, "risk-guard": 0, "session-recorder": 0}
+        )
         state["version"] = VERSION
         changed = True
     if not changed:
@@ -176,8 +216,21 @@ def main(argv: list[str]) -> int:
         return cmd_show()
     if cmd == "migrate":
         return cmd_migrate()
+    if cmd == "checksum":
+        return cmd_checksum()
     if cmd == "set-role" and rest:
         return cmd_set_role(rest[0])
+    if cmd == "set-pillar" and rest:
+        return cmd_set_pillar(rest[0])
+    if cmd == "set-phase" and rest:
+        step = None
+        if len(rest) >= 3 and rest[1] == "--step":
+            try:
+                step = int(rest[2])
+            except ValueError:
+                print("--step expects an integer", file=sys.stderr)
+                return 2
+        return cmd_set_phase(rest[0], step)
     if cmd == "set-gate" and rest:
         return cmd_set_gate(rest[0])
     if cmd == "set-claim" and rest:

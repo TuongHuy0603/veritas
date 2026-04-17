@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 """
-verify.py — grounding helpers for the ground-check module.
+verify-claim.py — grounding helpers for the verify-claim module.
 
 Three small checks, no dependencies, no network. The assistant calls these
 to confirm a claim before stating it.
 
 Usage:
-    python verify.py path <file_path>
-    python verify.py symbol <file_path> <symbol>
-    python verify.py version <manifest_path> <package>
+    python verify-claim.py path <file_path>
+    python verify-claim.py symbol <file_path> <symbol>
+    python verify-claim.py version <manifest_path> <package>
+
+The `version` check finds the package as either a dependency key or the
+manifest's own `"name"` field — useful for "is this project version X?".
 
 Exit codes:
     0  verified
@@ -70,6 +73,16 @@ def check_version(manifest: str, pkg: str) -> int:
         print(f"MANIFEST {manifest}: READ ERROR {e}")
         return 1
     name = path.name
+    # Special-case: manifest's OWN name (not a dependency). For package.json
+    # and similar, the version lives next to the name — match both fields.
+    if name == "package.json":
+        own = re.search(
+            rf'"name"\s*:\s*"{re.escape(pkg)}"[\s\S]*?"version"\s*:\s*"([^"]+)"',
+            text,
+        )
+        if own:
+            print(f"VERSION {pkg} (own) in {manifest}: {own.group(1)}")
+            return 0
     template = _MANIFEST_PATTERNS.get(name)
     if template is None:
         print(f"MANIFEST {manifest}: UNSUPPORTED FORMAT ({name})")

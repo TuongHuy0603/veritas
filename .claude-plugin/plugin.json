@@ -1,6 +1,6 @@
 {
   "name": "veritas",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Five-pillar builder and guardrail: plan, design, execute, verify, and gate — with a shared .veritas/ state directory.",
   "skills": [
     {

@@ -33,10 +33,16 @@ Produce a one-page scroll at `.veritas/HANDOFF.md`:
 - <dead ends and ruled-out paths>
 
 ## Checksum
-<sha256 of .veritas/state.json at the moment of writing>
+<output of: python src/veritas/scripts/track-state.py checksum>
 ```
 
 Rules: one page max, absolute not relative ("Thursday" → the date; "that function" → `path/to/file.py:name`), do-not list is mandatory, checksum is mandatory.
+
+Compute the checksum with:
+
+```bash
+python src/veritas/scripts/track-state.py checksum
+```
 
 Also run:
 

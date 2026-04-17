@@ -73,11 +73,13 @@ Veritas stays dormant when:
 - A routine edit on a local branch with an obvious, reversible diff.
 - A re-statement of a claim already grounded in the same session (checked via `state.json.last_claim_status`).
 
-## Trigger data
+## Trigger data — two tables, two jobs
 
-- [`src/veritas/data/trigger-verbs.csv`](../src/veritas/data/trigger-verbs.csv) — verbs + phrase patterns → pillar / role / module.
-- [`src/veritas/data/risky-ops.csv`](../src/veritas/data/risky-ops.csv) — action gate with `base_score` column.
-- [`src/veritas/data/pillar-intents.csv`](../src/veritas/data/pillar-intents.csv) — intent phrase → pillar routing.
+The trigger data is deliberately split so each table has a single responsibility. They are not redundant; they route different things.
+
+- [`src/veritas/data/trigger-verbs.csv`](../src/veritas/data/trigger-verbs.csv) — **guardrail-only routing.** Verbs that fire a role (verifier / risk-guard / session-recorder) and a module. Used by the guardrail interrupt path.
+- [`src/veritas/data/pillar-intents.csv`](../src/veritas/data/pillar-intents.csv) — **pillar routing.** Intent phrases that select a pillar (plan / design / execute / verify / guardrail) and the slash command that maps to it.
+- [`src/veritas/data/risky-ops.csv`](../src/veritas/data/risky-ops.csv) — action gate with `base_score` column. Consumed by `score-risk.py` and by `assess-risk` escalation rules.
 - [`src/veritas/data/design-rules.csv`](../src/veritas/data/design-rules.csv) — design-system rules consumed by the design pillar.
 
 All four files are append-only across minor versions. Removing or relocating a row is a breaking change.

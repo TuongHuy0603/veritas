@@ -2,7 +2,7 @@
   "name": "veritas",
   "displayName": "Veritas — Umbrella Builder & Guardrail",
   "description": "A five-pillar builder and guardrail for AI-assisted software work. Plan features, design UIs, execute phases, verify with TDD, and gate risky actions — with shared .veritas/ state (provenance DAG, hash-chained action log, canonical handoff, decision journal) across every pillar.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "TuongHuy0603",
   "license": "MIT",
   "repository": "https://github.com/TuongHuy0603/veritas",

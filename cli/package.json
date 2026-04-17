@@ -1,6 +1,6 @@
 {
   "name": "veritas-cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Installer for the Veritas skill across AI coding platforms.",
   "bin": {
     "veritas-cli": "./index.js"

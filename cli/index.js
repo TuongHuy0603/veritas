@@ -89,6 +89,10 @@ function installCommands(commandsDir, layout) {
     let name = file;
     if (layout === "prompt-files") {
       name = file.replace(/\.md$/, ".prompt.md");
+    } else if (layout === "cursor-mdc") {
+      // Cursor slash commands live as flat .mdc files in .cursor/rules/.
+      // Prefix with "veritas-" so they don't collide with other rules.
+      name = "veritas-" + file.replace(/\.md$/, ".mdc");
     }
     copyFile(src, path.join(commandsDir, name));
   }
@@ -163,13 +167,28 @@ function cmdUninstall(platform) {
     for (const file of fs.readdirSync(COMMANDS_ROOT)) {
       if (!file.endsWith(".md")) continue;
       const base = file.replace(/\.md$/, "");
-      for (const candidate of [file, `${base}.prompt.md`, `${base}.mdc`]) {
+      const candidates = [
+        file,
+        `${base}.prompt.md`,
+        `${base}.mdc`,
+        `veritas-${base}.mdc`,
+      ];
+      for (const candidate of candidates) {
         const p = path.join(commandsTarget, candidate);
         if (fs.existsSync(p)) {
           fs.unlinkSync(p);
           console.log(`Removed ${p}`);
           removed = true;
         }
+      }
+    }
+    // Cursor flat-skill files prefixed with veritas- live in the same dir.
+    for (const file of fs.readdirSync(commandsTarget)) {
+      if (file.startsWith("veritas-") && file.endsWith(".mdc")) {
+        const p = path.join(commandsTarget, file);
+        fs.unlinkSync(p);
+        console.log(`Removed ${p}`);
+        removed = true;
       }
     }
   }

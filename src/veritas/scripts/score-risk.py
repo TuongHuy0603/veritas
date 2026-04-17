@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-risk_score.py — compute a [0.0, 1.0] risk score for a proposed action.
+score-risk.py — compute a [0.0, 1.0] risk score for a proposed action.
 
 Inputs:
-    action string           what Sentinel is about to gate
+    action string           what RiskGuard is about to gate
     --branch BRANCH         current git branch (default: current HEAD)
     --rev REF               proposed reversibility reference (hash / NONE / …)
     --authz STATUS          yes | no | ambiguous | unspecified
@@ -215,7 +215,7 @@ def score_action(
 
 
 def main(argv: list[str]) -> int:
-    parser = argparse.ArgumentParser(prog="risk_score.py", description=__doc__)
+    parser = argparse.ArgumentParser(prog="score-risk.py", description=__doc__)
     parser.add_argument("action")
     parser.add_argument("--branch", default=None)
     parser.add_argument("--rev", default="NONE")
